@@ -47,7 +47,7 @@ function showLoading() {
                         <!-- نوشته "Popcorn" روی جعبه -->
                     </svg>
                 </div>
-                <p class="text-white text-lg font-semibold">در حال دریافت اطلاعات...</p>
+                <p class="text-white text-lg font-semibold">در حال دریافت نتایج...</p>
             </div>
         </div>
     `);
