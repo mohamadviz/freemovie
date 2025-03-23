@@ -1,11 +1,9 @@
-// apiKeySwitcher.js
 class ApiKeySwitcher {
     constructor(keys) {
         this.keys = keys || [];
         this.currentIndex = 0;
     }
 
-    // Get the current API key
     getCurrentKey() {
         if (this.keys.length === 0) {
             throw new Error('هیچ کلید API در دسترس نیست.');
@@ -13,36 +11,39 @@ class ApiKeySwitcher {
         return this.keys[this.currentIndex];
     }
 
-    // Switch to the next API key
     switchToNextKey() {
         this.currentIndex = (this.currentIndex + 1) % this.keys.length;
         console.log(`تعویض به کلید API جدید: ${this.getCurrentKey()}`);
     }
 
-    // Fetch with automatic key switching
-    async fetchWithKeySwitch(urlTemplate, maxRetries = null) {
-        const retries = maxRetries !== null ? maxRetries : this.keys.length;
+    async fetchWithKeySwitch(urlTemplate, maxRetriesPerKey = 3) {
         let attempts = 0;
+        const totalAttemptsLimit = this.keys.length * maxRetriesPerKey; // حداکثر کل تلاش‌ها
 
-        while (attempts < retries) {
+        while (attempts < totalAttemptsLimit) {
             const url = urlTemplate(this.getCurrentKey());
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     if (response.status === 429) {
-                        console.warn('محدودیت نرخ OMDB API - تعویض کلید...');
-                        this.switchToNextKey();
+                        console.warn('محدودیت نرخ OMDB API - تلاش مجدد با همین کلید...');
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // تاخیر ۱ ثانیه
                         attempts++;
-                        continue;
+                        continue; // دوباره با همون کلید تلاش کن
                     }
                     throw new Error(`خطای سرور (OMDB): ${response.status}`);
                 }
+                // اگه درخواست موفق بود، داده رو برگردون و حلقه رو بشکن
                 return await response.json();
             } catch (error) {
                 console.warn(`خطا در درخواست با کلید ${this.getCurrentKey()}: ${error.message}`);
-                this.switchToNextKey();
                 attempts++;
-                if (attempts >= retries) {
+                // اگه تعداد تلاش‌ها با این کلید به حد مجاز رسید، کلید رو عوض کن
+                if (attempts % maxRetriesPerKey === 0) {
+                    this.switchToNextKey();
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000)); // تاخیر ۱ ثانیه قبل از تلاش بعدی
+                if (attempts >= totalAttemptsLimit) {
                     throw new Error('تمام کلیدهای API امتحان شدند و خطا ادامه دارد.');
                 }
             }
@@ -50,17 +51,35 @@ class ApiKeySwitcher {
     }
 }
 
-// Load API keys from JSON file
 async function loadApiKeys() {
-    try {
-        const response = await fetch('./omdbKeys.json'); // فرض بر این است که omdbKeys.json در همان پوشه است
-        if (!response.ok) {
-            throw new Error(`خطا در بارگذاری فایل JSON: ${response.status}`);
+    const possiblePaths = [
+        '/freemovie/omdbKeys.json',        // مسیر روت پروژه
+        '/freemovie/../omdbKeys.json'      // یک فولدر قبل‌تر (به روت برمی‌گرده)
+    ];
+
+    for (const path of possiblePaths) {
+        try {
+            const response = await fetch(path);
+            if (!response.ok) {
+                console.warn(`خطا در بارگذاری از ${path}: ${response.status}`);
+                continue; // اگه مسیر کار نکرد، بعدی رو تست کن
+            }
+            const keys = await response.json();
+            console.log(`فایل کلیدها از ${path} با موفقیت بارگذاری شد.`);
+            return new ApiKeySwitcher(keys);
+        } catch (error) {
+            console.warn(`خطا در مسیر ${path}: ${error.message}`);
         }
-        const keys = await response.json();
-        return new ApiKeySwitcher(keys);
-    } catch (error) {
-        console.error('خطا در بارگذاری کلیدهای API:', error);
-        return new ApiKeySwitcher(['38fa39d5']); // کلید پیش‌فرض
     }
+
+    console.error('هیچ فایل کلید API پیدا نشد.');
+    return new ApiKeySwitcher(['38fa39d5']); // کلید پیش‌فرض
 }
+
+/* // استفاده از کد (اختیاری - برای تست)
+(async () => {
+    const apiSwitcher = await loadApiKeys();
+    const urlTemplate = (key) => `http://www.omdbapi.com/?apikey=${key}&t=Matrix`;
+    const data = await apiSwitcher.fetchWithKeySwitch(urlTemplate);
+    console.log(data);
+})(); */

@@ -1,9 +1,9 @@
 // seriesDetails.js
-const apiKey = 'f0f18967c3e6c8bf193880c85995e93a'; // TMDb API key
+const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // TMDb API key
 const language = 'fa-IR'; // Language set to Persian (Iran)
 const baseImageUrl = 'https://image.tmdb.org/t/p/'; // TMDb base image URL
-const defaultPoster = 'https://via.placeholder.com/500x750?text=No+Image'; // Default poster fallback
-const defaultBackdrop = 'https://via.placeholder.com/1920x1080?text=No+Image'; // Default backdrop fallback
+const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie-300.png'; // Default poster fallback
+const defaultBackdrop = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie-300.png'; // Default backdrop fallback
 const seriesId = new URLSearchParams(window.location.search).get('id');
 
 let apiKeySwitcher;

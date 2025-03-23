@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فیری مووی - صفحه اصلی</title>
+    <!-- تغییرات سئو -->
+    <title>فیری مووی - دانلود و تماشای جدیدترین فیلم‌ها و سریال‌ها</title> <!-- عنوان بهینه‌تر با کلمات کلیدی -->
+    <meta name="description" content="فیری مووی - اطلاعات جدیدترین فیلم‌ها و سریال‌های پرطرفدار را ببینید و از لینک‌های دانلود الماس مووی استفاده کنید."> <!-- توضیحات متا برای موتورهای جستجو -->
+    <meta name="keywords" content="فیری مووی, دانلود فیلم, سریال پرطرفدار, اطلاعات فیلم, الماس مووی"> <!-- کلمات کلیدی مرتبط -->
+    <meta name="robots" content="index, follow"> <!-- اجازه به موتورهای جستجو برای ایندکس و فالو -->
+    <meta name="author" content="تیم فیری مووی"> <!-- مشخص کردن نویسنده -->
+    <link rel="canonical" href="https://m4tinbeigi-official.github.io/freemovie/"> <!-- لینک canonical برای جلوگیری از محتوای تکراری -->
+    <meta property="og:title" content="فیری مووی - صفحه اصلی"> <!-- Open Graph برای شبکه‌های اجتماعی -->
+    <meta property="og:description" content="اطلاعات جدیدترین فیلم‌ها و سریال‌ها را در فیری مووی ببینید."> <!-- توضیحات OG -->
+    <meta property="og:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png"> <!-- تصویر OG -->
+    <meta property="og:url" content="https://m4tinbeigi-official.github.io/freemovie/"> <!-- URL OG -->
+    <meta property="og:type" content="website"> <!-- نوع محتوا -->
+    <meta name="twitter:card" content="summary_large_image"> <!-- توییتر کارت -->
+    <meta name="twitter:title" content="فیری مووی - صفحه اصلی"> <!-- عنوان توییتر -->
+    <meta name="twitter:description" content="اطلاعات فیلم‌ها و سریال‌ها با لینک دانلود از الماس مووی."> <!-- توضیحات توییتر -->
+    <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png"> <!-- تصویر توییتر -->
+    <!-- پایان تغییرات سئو -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
-    <script src="https://cdn.counter.dev/script.js" data-id="42aac39f-23a3-416e-a788-12c3bafefb62" data-utcoffset="4"></script>
-    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <script src="/freemovie/analytics.js" defer></script> <!-- اضافه کردن defer برای بهینه‌سازی بارگذاری -->
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"></script>
+	<script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" defer></script> <!-- اضافه کردن defer -->
     <style>
         body { font-family: 'Vazir', sans-serif; direction: rtl; }
         * {
@@ -30,15 +47,15 @@
         <div class="container mx-auto flex flex-row justify-between items-center">
             <!-- ناوبری -->
             <nav class="flex items-center space-x-4">
-                <a href="/freemovie" class="hover:text-gray-300 p-4"><i class="fas fa-home"></i></a>
-                <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300"><i class="fas fa-bookmark"></i></a>
-                <a href="/freemovie/search/index.html" class="hover:text-gray-300"><i class="fas fa-search"></i></a>
-                <button id="theme-toggle" class="hover:text-gray-300"><i class="fas fa-sun"></i></button>
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a> <!-- اضافه کردن aria-label برای دسترسی‌پذیری -->
+                <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300" aria-label="واچ‌لیست"><i class="fas fa-bookmark"></i></a>
+                <a href="/freemovie/search/index.html" class="hover:text-gray-300" aria-label="جستجو"><i class="fas fa-search"></i></a>
+                <button id="theme-toggle" class="hover:text-gray-300" aria-label="تغییر تم"><i class="fas fa-sun"></i></button>
             </nav>
             <!-- لوگو -->
             <div>
                 <a href="https://m4tinbeigi-official.github.io/freemovie/">
-                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگو" class="h-10">
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10"> <!-- اصلاح alt برای سئو -->
                 </a>
             </div>
         </div>
@@ -50,7 +67,7 @@
         <div id="disclaimer-notice" class="bg-gray-700 text-white p-4 rounded-lg shadow-md mb-6 mx-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                 <p class="text-sm md:text-base">
-                    📢 <strong>سلب مسئولیت:</strong> این وب‌سایت فقط اطلاعات فیلم و سریال را نمایش می‌دهد و هیچ محتوایی را میزبانی نمی‌کند. اطلاعات از APIهای عمومی و لینک‌های دانلود از <a href="https://almasmovie.website/" target="_blank" class="underline hover:text-gray-300">الماس مووی</a> دریافت می‌شود. برای جزئیات بیشتر، <a href="/freemovie/disclaimer/index.html" class="underline hover:text-gray-300">صفحه سلب مسئولیت</a> را ببینید.
+                    📢 <strong>سلب مسئولیت:</strong> این وب‌سایت فقط اطلاعات فیلم و سریال را نمایش می‌دهد و هیچ محتوایی را میزبانی نمی‌کند. اطلاعات از APIهای عمومی و لینک‌های دانلود از <a href="https://almasmovie.website/" target="_blank" class="underline hover:text-gray-300" rel="nofollow">الماس مووی</a> دریافت می‌شود. برای جزئیات بیشتر، <a href="/freemovie/disclaimer/index.html" class="underline hover:text-gray-300">صفحه سلب مسئولیت</a> را ببینید.
                 </p>
             </div>
         </div>
@@ -80,8 +97,8 @@
 
     <!-- دکمه گزارش باگ -->
     <div class="fixed bottom-5 right-5 z-50">
-        <button id="fab" class="bg-gray-500 w-12 h-12 md:w-14 md:h-14 bg-[#1A1A2E] border-2 border-[#FFC107] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 animate-pulse">
-            <img src="images/bug-regular-24.png" alt="ریپورت باگ" class="w-6 h-6 md:w-7 md:h-7 filter invert-[85%] sepia-[100%] saturate-[1000%] hue-rotate-0">
+        <button id="fab" class="bg-gray-500 w-12 h-12 md:w-14 md:h-14 bg-[#1A1A2E] border-2 border-[#FFC107] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 animate-pulse" aria-label="گزارش باگ">
+            <img src="images/bug-regular-24.png" alt="آیکون گزارش باگ" class="w-6 h-6 md:w-7 md:h-7 filter invert-[85%] sepia-[100%] saturate-[1000%] hue-rotate-0">
         </button>
         <div id="fabOptions" class="hidden absolute bottom-16 right-0 bg-gray-500 rounded-lg shadow-lg w-48 p-2">
             <a href="https://github.com/m4tinbeigi-official/freemovie/issues/new?template=%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4-%D9%85%D8%B4%DA%A9%D9%84-%DB%8C%D8%A7-%D9%BE%DB%8C%D8%B4%D9%86%D9%87%D8%A7%D8%AF-%D8%AC%D8%AF%DB%8C%D8%AF.md" target="_blank" class="block text-black font-bold py-2 text-center hover:bg-[#FFC107] hover:text-[#1A1A2E] transition-colors duration-200">گزارش مشکلات در گیت‌هاب</a>
@@ -89,55 +106,51 @@
         </div>
     </div>
 	
-		<!-- پاپ‌آپ حمایت -->
-	<div id="support-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-		<div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
-			<h3 class="text-xl font-bold text-white mb-4">حمایت از فیری مووی</h3>
-			<p class="text-gray-200 mb-6">با توییت زدن یا گذاشتن استوری در اینستاگرام، از فیری مووی حمایت کنید و ما را به دوستانتان معرفی کنید!</p>
-			<p class="text-gray-200 mb-6">منشن و درج لینک فراموش نشه |‌@freemovie_ir</p>
-			<div class="flex justify-center gap-4 mb-6">
-				<!-- تصویر توییتر -->
-				<div>
-					<img src="https://github.com/m4tinbeigi-official/freemovie/images/story.png" alt="تصویر توییتر" class="w-32 h-32 rounded-md">
-					<button id="download-twitter" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">دانلود تصویر توییتر</button>
-				</div>
-				<!-- تصویر اینستاگرام -->
-				<div>
-					<img src="https://github.com/m4tinbeigi-official/freemovie/images/tweet.png" alt="تصویر اینستاگرام" class="w-32 h-32 rounded-md">
-					<button id="download-instagram" class="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 w-full">دانلود تصویر اینستاگرام</button>
-				</div>
-			</div>
-			<button id="tweet-support" class="bg-blue-400 text-white px-6 py-2 rounded hover:bg-blue-500 mb-4">انتشار توییت</button>
-			<button id="close-popup" class="block mx-auto text-gray-300 hover:text-white focus:outline-none">
-				<i class="fas fa-times"></i> بستن
-			</button>
-		</div>
-	</div>
+    <!-- پاپ‌آپ حمایت -->
+    <div id="support-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
+            <h3 class="text-xl font-bold text-white mb-4">حمایت از فیری مووی</h3>
+            <p class="text-gray-200 mb-6">با توییت زدن یا گذاشتن استوری در اینستاگرام، از فیری مووی حمایت کنید و ما را به دوستانتان معرفی کنید!</p>
+            <p class="text-gray-200 mb-6">منشن و درج لینک فراموش نشه |‌@freemovie_ir</p>
+            <div class="flex justify-center gap-4 mb-6">
+                <!-- تصویر توییتر -->
+                <div>
+                    <img src="https://github.com/m4tinbeigi-official/freemovie/images/story.png" alt="تصویر تبلیغاتی توییتر فیری مووی" class="w-32 h-32 rounded-md">
+                    <button id="download-twitter" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">دانلود تصویر توییتر</button>
+                </div>
+                <!-- تصویر اینستاگرام -->
+                <div>
+                    <img src="https://github.com/m4tinbeigi-official/freemovie/images/tweet.png" alt="تصویر تبلیغاتی اینستاگرام فیری مووی" class="w-32 h-32 rounded-md">
+                    <button id="download-instagram" class="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 w-full">دانلود تصویر اینستاگرام</button>
+                </div>
+            </div>
+            <button id="tweet-support" class="bg-blue-400 text-white px-6 py-2 rounded hover:bg-blue-500 mb-4">انتشار توییت</button>
+            <button id="close-popup" class="block mx-auto text-gray-300 hover:text-white focus:outline-none" aria-label="بستن پاپ‌آپ">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    </div>
 
     <!-- فوتر -->
     <footer class="bg-gray-800 p-4 mt-auto">
         <div class="container mx-auto text-center">
             <p>
-			فیری مووی - ساخته شده با 🤍
-			<br>
-			استفاده از فونت <a href="https://rastikerdar.github.io/vazir-font/" class="hover:text-gray-300">وزیرمتن</a> به یاد صابر راستی کردار<br>
+                فیری مووی - ساخته شده با 🤍
+                <br>
+                استفاده از فونت <a href="https://rastikerdar.github.io/vazir-font/" class="hover:text-gray-300">وزیرمتن</a> به یاد صابر راستی کردار<br>
             </p>
             <a href="developer/index.html">توسعه‌دهندگان</a> | <a href="about-freemovie/index.html">درباره فیری مووی</a>
             <br>
             <a href="disclaimer/index.html">سلب مسئولیت</a> | <a href="disclaimer/index-en.html">DMCA</a>
             <div class="social-icons mb-2">
-                <a class="github-button" href="https://github.com/m4tinbeigi-official/freemovie" data-icon="octicon-star" data-show-count="true" aria-label="Star m4tinbeigi-official/freemovie on GitHub">Star</a>
+                <a class="github-button" href="https://github.com/m4tinbeigi-official/freemovie" data-icon="octicon-star" data-show-count="true" aria-label="ستاره دادن به فیری مووی در گیت‌هاب">Star</a>
                 <script async defer src="https://buttons.github.io/buttons.js"></script>
             </div>
         </div>
     </footer>
 
-    <script src="apiKeySwitcher.js"></script>
-    <script src="script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9208c4d9e930afbf',t:'MTc0MjAwNzcxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9236b49c1ca54954',t:'MTc0MjQ4OTM5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9236cd258dc84bfc',t:'MTc0MjQ5MDM5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'923a0b3fbde49c3a',t:'MTc0MjUyNDQwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-</body>
+    <script src="apiKeySwitcher.js" defer></script> <!-- اضافه کردن defer -->
+    <script src="script.js" defer></script> <!-- اضافه کردن defer -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script> <!-- اضافه کردن defer -->
+    </body>
 </html>

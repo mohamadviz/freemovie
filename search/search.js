@@ -1,5 +1,5 @@
 // search.js
-const apiKey = 'f0f18967c3e6c8bf193880c85995e93a'; // TMDb API key
+const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // TMDb API key
 const language = 'fa-IR'; // Language set to Persian (Iran)
 const baseImageUrl = 'https://image.tmdb.org/t/p/w500'; // TMDb base image URL
 const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png'; // Default poster fallback
@@ -9,13 +9,15 @@ let apiKeySwitcher; // Global variable to hold the switcher instance
 // تابع برای دریافت یا ذخیره تصویر از/در کش با استفاده از localStorage
 function getCachedImage(id, fetchFunction) {
     const cachedImage = localStorage.getItem(`image_${id}`);
-    if (cachedImage) {
+    if (cachedImage && cachedImage !== defaultPoster) { // جلوگیری از استفاده کش برای تصویر پیش‌فرض
         console.log(`تصویر کش‌شده برای شناسه ${id} از Local Storage بارگذاری شد`);
         return Promise.resolve(cachedImage);
     }
     return fetchFunction().then(poster => {
-        localStorage.setItem(`image_${id}`, poster);
-        console.log(`تصویر برای شناسه ${id} در Local Storage ذخیره شد`);
+        if (poster !== defaultPoster) { // فقط پوسترهای غیرپیش‌فرض کش می‌شن
+            localStorage.setItem(`image_${id}`, poster);
+            console.log(`تصویر برای شناسه ${id} در Local Storage ذخیره شد`);
+        }
         return poster;
     });
 }
@@ -25,42 +27,68 @@ async function initializeSwitcher() {
     apiKeySwitcher = await loadApiKeys(); // استفاده از loadApiKeys سراسری
 }
 
+// تابع نمایش لودینگ
+function showLoading() {
+    document.body.insertAdjacentHTML('beforeend', `
+        <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 animate-spin" style="border-top-color: #3498db;"></div>
+        </div>
+    `);
+}
+
+// تابع حذف لودینگ
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) loadingOverlay.remove();
+}
+
 async function searchMovies(query) {
     const movieResults = document.getElementById('movie-results');
     const tvResults = document.getElementById('tv-results');
     const movieTitle = document.getElementById('movie-title');
     const tvTitle = document.getElementById('tv-title');
 
-    movieResults.innerHTML = '';
-    tvResults.innerHTML = '';
-    movieTitle.textContent = `نتایج جستجو فیلم ${query}`;
-    tvTitle.textContent = `نتایج جستجو سریال ${query}`;
+    // تبدیل به حروف کوچک و حذف فاصله‌های اضافی
+    const cleanedQuery = query.trim().toLowerCase();
+
+    // نمایش لودینگ
+    showLoading();
 
     try {
         // Define TMDb search endpoints
-        const movieSearchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(query)}`;
-        const tvSearchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(query)}`;
+        const movieSearchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(cleanedQuery)}`;
+        const tvSearchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(cleanedQuery)}`;
 
-        // Fetch movie data
-        const movieRes = await fetch(movieSearchUrl);
-        if (!movieRes.ok) throw new Error(`خطای سرور (فیلم‌ها): ${movieRes.status}`);
-        const movieData = await movieRes.json();
-        const movies = movieData.results || [];
+        // دریافت همه داده‌ها قبل از نمایش
+        const [movieRes, tvRes] = await Promise.all([
+            fetch(movieSearchUrl).then(res => {
+                if (!res.ok) throw new Error(`خطای سرور (فیلم‌ها): ${res.status}`);
+                return res.json();
+            }),
+            fetch(tvSearchUrl).then(res => {
+                if (!res.ok) throw new Error(`خطای سرور (سریال‌ها): ${res.status}`);
+                return res.json();
+            })
+        ]);
 
-        // Fetch TV show data
-        const tvRes = await fetch(tvSearchUrl);
-        if (!tvRes.ok) throw new Error(`خطای سرور (سریال‌ها): ${tvRes.status}`);
-        const tvShows = await tvRes.json();
-        const tvSeries = tvShows.results || [];
+        const movies = movieRes.results || [];
+        const tvSeries = tvRes.results || [];
 
-        console.log('Movie results:', movieData); // Debugging
-        console.log('TV results:', tvShows); // Debugging
+        console.log('Movie results:', movieRes); // Debugging
+        console.log('TV results:', tvRes); // Debugging
+
+        // پاکسازی کانتینرها فقط بعد از لود کامل
+        movieResults.innerHTML = '';
+        tvResults.innerHTML = '';
+        movieTitle.textContent = `نتایج جستجو فیلم ${cleanedQuery}`;
+        tvTitle.textContent = `نتایج جستجو سریال ${cleanedQuery}`;
 
         // مجموعه‌ای برای جلوگیری از تکرار
         const seenIds = new Set();
 
+        // رندر فقط بعد از دریافت همه داده‌ها
         if (tvSeries.length > 0 || movies.length > 0) {
-            // Render TV shows first (prioritized as in original PHP)
+            // رندر سریال‌ها (اولویت با سریال‌ها)
             if (tvSeries.length > 0) {
                 for (const tv of tvSeries) {
                     if (seenIds.has(tv.id)) {
@@ -88,9 +116,7 @@ async function searchMovies(query) {
                         console.warn(`خطا در دریافت پوستر سریال ${tv.id} از OMDB:`, fetchError.message);
                     }
 
-                    // Remove "300" before ".jpg"
-                    let posterUrl = poster;
-					//.replace(/300(?=\.jpg$)/i, '');
+                    let posterUrl = poster; //.replace(/300(?=\.jpg$)/i, '');
 
                     const tvId = tv.id;
                     const title = tv.name || 'نامشخص';
@@ -111,7 +137,7 @@ async function searchMovies(query) {
                 tvResults.innerHTML = '<p class="text-center text-red-500">سریالی یافت نشد!</p>';
             }
 
-            // Render movies
+            // رندر فیلم‌ها
             if (movies.length > 0) {
                 for (const movie of movies) {
                     if (seenIds.has(movie.id)) {
@@ -139,7 +165,6 @@ async function searchMovies(query) {
                         console.warn(`خطا در دریافت پوستر فیلم ${movie.id} از OMDB:`, fetchError.message);
                     }
 
-                    // Remove "300" before ".jpg"
                     let posterUrl = poster.replace(/300(?=\.jpg$)/i, '');
 
                     const movieId = movie.id;
@@ -168,37 +193,42 @@ async function searchMovies(query) {
         console.error('خطا در دریافت اطلاعات:', error);
         movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد! لطفاً دوباره تلاش کنید.</p>';
         tvResults.innerHTML = '';
+    } finally {
+        // حذف لودینگ بعد از اتمام کار (موفق یا ناموفق)
+        hideLoading();
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeSwitcher();
-    document.getElementById('search').addEventListener(
-        'input',
-        debounce(function () {
-            const query = this.value.trim();
-            if (query.length > 2) {
-                searchMovies(query);
-            } else {
-                document.getElementById('movie-title').textContent = 'نتایج جستجو فیلم';
-                document.getElementById('tv-title').textContent = 'نتایج جستجو سریال';
-                document.getElementById('movie-results').innerHTML = `
-                    <div class="skeleton"></div>
-                    <div class="skeleton"></div>
-                `;
-                document.getElementById('tv-results').innerHTML = '';
-            }
-        }, 300)
-    );
+    const searchInput = document.getElementById('search');
+    const searchButton = document.getElementById('search-button');
+
+    searchButton.addEventListener('click', () => {
+        const query = searchInput.value.trim();
+        if (query.length > 2) {
+            searchMovies(query);
+        } else {
+            hideLoading();
+            document.getElementById('movie-title').textContent = 'نتایج جستجو فیلم';
+            document.getElementById('tv-title').textContent = 'نتایج جستجو سریال';
+            document.getElementById('movie-results').innerHTML = `
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+            `;
+            document.getElementById('tv-results').innerHTML = '';
+        }
+    });
+
+    // اجازه جستجو با Enter
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchButton.click();
+        }
+    });
 });
 
-function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+// حذف debounce چون با دکمه کار نمی‌کنه
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');

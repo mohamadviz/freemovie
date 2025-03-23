@@ -15,12 +15,20 @@ const imageCache = {};
 
 // تابع برای دریافت یا ذخیره تصویر از/در کش
 function getCachedImage(id, fetchFunction) {
-    if (imageCache[id]) {
+    // اگه تصویر قبلاً کش شده و برابر با پیش‌فرض نیست، از کش استفاده کن
+    if (imageCache[id] && imageCache[id] !== defaultPoster) {
         console.log(`تصویر کش‌شده برای شناسه ${id} بارگذاری شد`);
         return Promise.resolve(imageCache[id]);
     }
+    // در غیر این صورت، درخواست جدید انجام بده
     return fetchFunction().then(poster => {
-        imageCache[id] = poster;
+        // اگه پوستر برابر با پیش‌فرض نیست، کشش کن
+        if (poster !== defaultPoster) {
+            imageCache[id] = poster;
+            console.log(`تصویر برای شناسه ${id} در کش ذخیره شد`);
+        } else {
+            console.log(`تصویر پیش‌فرض ${defaultPoster} کش نشد`);
+        }
         return poster;
     });
 }
@@ -123,7 +131,7 @@ async function fetchAndDisplayContent() {
                 }
                 seenIds.add(tv.id);
 
-				let poster = defaultPoster.replace(/300(?=\.jpg$)/i, '');
+                let poster = defaultPoster.replace(/300(?=\.jpg$)/i, '');
                 const tvDetailsUrl = `https://api.themoviedb.org/3/tv/${tv.id}/external_ids?api_key=${apiKey}`;
                 try {
                     const detailsRes = await fetch(tvDetailsUrl);
@@ -330,7 +338,6 @@ function manageFabButton() {
 
 window.addEventListener('DOMContentLoaded', manageFabButton);
 
-
 function manageThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
@@ -354,6 +361,3 @@ function manageThemeToggle() {
         themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
     }
 }
-
-// حذف شنونده تکراری DOMContentLoaded
-// فقط یکی از این دو شنونده کافی است، بنابراین دومی حذف شده است
