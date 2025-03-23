@@ -14,6 +14,8 @@ async function initializeSwitcher() {
 
 async function getSeriesDetails() {
     try {
+        showLoading(); // نمایش لودینگ قبل از شروع درخواست‌ها
+
         // Check if series ID exists in URL
         if (!seriesId) {
             throw new Error('شناسه سریال در URL وجود ندارد!');
@@ -156,7 +158,7 @@ async function getSeriesDetails() {
                 for (let season = 1; season <= numberOfSeasons; season++) {
                     downloadHtml += `<h3 class="text-xl font-bold mt-4">فصل ${season}</h3>`;
                     for (let quality = 1; quality <= 4; quality++) {
-                        const qualityNum = quality; // Assuming quality numbers are 1-4
+                        const qualityNum = quality;
                         const downloadLink = `https://subtitle.saymyname.website/DL/filmgir/?i=${imdbId}&f=${season}&q=${quality}`;
                         downloadHtml += `
                             <a href="${downloadLink}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mx-2 my-1 inline-block" rel="nofollow">
@@ -191,6 +193,8 @@ async function getSeriesDetails() {
         if (downloadLinksContainer) {
             downloadLinksContainer.innerHTML = `<p class="text-red-500">خطا در دریافت اطلاعات: ${error.message}</p>`;
         }
+    } finally {
+        hideLoading(); // مخفی کردن لودینگ بعد از اتمام درخواست‌ها
     }
 }
 

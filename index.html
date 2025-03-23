@@ -1,53 +1,69 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="fa" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- تغییرات سئو -->
-    <title>فیری مووی - دانلود و تماشای جدیدترین فیلم‌ها و سریال‌ها</title> <!-- عنوان بهینه‌تر با کلمات کلیدی -->
-    <meta name="description" content="فیری مووی - اطلاعات جدیدترین فیلم‌ها و سریال‌های پرطرفدار را ببینید و از لینک‌های دانلود الماس مووی استفاده کنید."> <!-- توضیحات متا برای موتورهای جستجو -->
-    <meta name="keywords" content="فیری مووی, دانلود فیلم, سریال پرطرفدار, اطلاعات فیلم, الماس مووی"> <!-- کلمات کلیدی مرتبط -->
-    <meta name="robots" content="index, follow"> <!-- اجازه به موتورهای جستجو برای ایندکس و فالو -->
-    <meta name="author" content="تیم فیری مووی"> <!-- مشخص کردن نویسنده -->
-    <link rel="canonical" href="https://m4tinbeigi-official.github.io/freemovie/"> <!-- لینک canonical برای جلوگیری از محتوای تکراری -->
-    <meta property="og:title" content="فیری مووی - صفحه اصلی"> <!-- Open Graph برای شبکه‌های اجتماعی -->
-    <meta property="og:description" content="اطلاعات جدیدترین فیلم‌ها و سریال‌ها را در فیری مووی ببینید."> <!-- توضیحات OG -->
-    <meta property="og:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png"> <!-- تصویر OG -->
-    <meta property="og:url" content="https://m4tinbeigi-official.github.io/freemovie/"> <!-- URL OG -->
-    <meta property="og:type" content="website"> <!-- نوع محتوا -->
-    <meta name="twitter:card" content="summary_large_image"> <!-- توییتر کارت -->
-    <meta name="twitter:title" content="فیری مووی - صفحه اصلی"> <!-- عنوان توییتر -->
-    <meta name="twitter:description" content="اطلاعات فیلم‌ها و سریال‌ها با لینک دانلود از الماس مووی."> <!-- توضیحات توییتر -->
-    <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png"> <!-- تصویر توییتر -->
+    <title>فیری مووی - دانلود و تماشای جدیدترین فیلم‌ها و سریال‌ها</title>
+    <meta name="description" content="فیری مووی - اطلاعات جدیدترین فیلم‌ها و سریال‌های پرطرفدار را ببینید و از لینک‌های دانلود الماس مووی استفاده کنید;">
+    <meta name="keywords" content="فیری مووی, دانلود فیلم, سریال پرطرفدار, اطلاعات فیلم, الماس مووی">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="تیم فیری مووی">
+    <link rel="canonical" href="https://m4tinbeigi-official.github.io/freemovie/">
+    <meta property="og:title" content="فیری مووی - صفحه اصلی">
+    <meta property="og:description" content="اطلاعات جدیدترین فیلم‌ها و سریال‌ها را در فیری مووی ببینید;">
+    <meta property="og:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png">
+    <meta property="og:url" content="https://m4tinbeigi-official.github.io/freemovie/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="فیری مووی - صفحه اصلی">
+    <meta name="twitter:description" content="اطلاعات فیلم‌ها و سریال‌ها با لینک دانلود از الماس مووی;">
+    <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png">
     <!-- پایان تغییرات سئو -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
-    <script src="/freemovie/analytics.js" defer></script> <!-- اضافه کردن defer برای بهینه‌سازی بارگذاری -->
+    <script src="/freemovie/analytics.js" defer></script>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"></script>
-	<script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" defer></script> <!-- اضافه کردن defer -->
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" defer></script>
     <style>
         body { font-family: 'Vazir', sans-serif; direction: rtl; }
-        * {
-            box-sizing: border-box;
-            padding: 0;
-            margin: 0;
-            text-decoration: none;
-        }
+        * { box-sizing: border-box; padding: 0; margin: 0; text-decoration: none; }
         .skeleton { background: #333; animation: pulse 1.5s infinite; height: 16rem; border-radius: 0.5rem; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         .nav-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; }
         #disclaimer-notice { z-index: 10; direction: rtl; }
+
+        /* استایل نوار پیشرفت */
+        #loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background-color: #FFC107;
+            width: 0;
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+
+        /* استایل‌های لودینگ قدیمی (در صورت نیاز به حفظ یا حذف) */
+        .popcorn { animation: bounce 1s infinite ease-in-out; }
+        .popcorn-piece { transform-origin: center; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pop { 0% { transform: scale(0.8) translateY(0); opacity: 0.8; } 50% { transform: scale(1.1) translateY(-15px); opacity: 1; } 100% { transform: scale(0.8) translateY(0); opacity: 0.8; } }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <!-- نوار پیشرفت -->
+    <div id="loading-bar"></div>
+
     <!-- هدر -->
     <header class="bg-gray-800 p-4 shadow-md">
         <div class="container mx-auto flex flex-row justify-between items-center">
             <!-- ناوبری -->
             <nav class="flex items-center space-x-4">
-                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a> <!-- اضافه کردن aria-label برای دسترسی‌پذیری -->
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a>
                 <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300" aria-label="واچ‌لیست"><i class="fas fa-bookmark"></i></a>
                 <a href="/freemovie/search/index.html" class="hover:text-gray-300" aria-label="جستجو"><i class="fas fa-search"></i></a>
                 <button id="theme-toggle" class="hover:text-gray-300" aria-label="تغییر تم"><i class="fas fa-sun"></i></button>
@@ -55,7 +71,7 @@
             <!-- لوگو -->
             <div>
                 <a href="https://m4tinbeigi-official.github.io/freemovie/">
-                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10"> <!-- اصلاح alt برای سئو -->
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10">
                 </a>
             </div>
         </div>
@@ -73,7 +89,6 @@
         </div>
         
         <h2 class="text-2xl font-bold mb-4 text-center">جدیدترین فیلم‌ها</h2>
-       
         <div id="new-movies" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 m-4">
             <!-- Skeleton placeholders -->
             <div class="skeleton w-full"></div>
@@ -149,8 +164,8 @@
         </div>
     </footer>
 
-    <script src="apiKeySwitcher.js" defer></script> <!-- اضافه کردن defer -->
-    <script src="script.js" defer></script> <!-- اضافه کردن defer -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script> <!-- اضافه کردن defer -->
-    </body>
+    <script src="apiKeySwitcher.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
 </html>

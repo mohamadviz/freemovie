@@ -31,7 +31,24 @@ async function initializeSwitcher() {
 function showLoading() {
     document.body.insertAdjacentHTML('beforeend', `
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 animate-spin" style="border-top-color: #3498db;"></div>
+            <div class="flex flex-col items-center">
+                <div class="popcorn mb-6">
+                    <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <!-- جعبه پاپ‌کورن -->
+                        <rect x="16" y="32" width="32" height="24" rx="4" fill="#ffaa07" stroke="#1f2937" stroke-width="2"/>
+                        <rect x="12" y="28" width="40" height="8" rx="2" fill="#ffaa07"/>
+                        <!-- خطوط کلاسیک روی جعبه -->
+                        <path d="M16 32 L48 32" stroke="#1f2937" stroke-width="2"/>
+                        <path d="M16 36 L48 36" stroke="#1f2937" stroke-width="1"/>
+                        <!-- پاپ‌کورن‌های بیرون‌زده -->
+                        <circle cx="24" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out;"/>
+                        <circle cx="32" cy="20" r="5" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.2s;"/>
+                        <circle cx="40" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.4s;"/>
+                        <!-- نوشته "Popcorn" روی جعبه -->
+                    </svg>
+                </div>
+                <p class="text-white text-lg font-semibold">در حال دریافت نتایج...</p>
+            </div>
         </div>
     `);
 }
@@ -41,6 +58,7 @@ function hideLoading() {
     const loadingOverlay = document.getElementById('loading-overlay');
     if (loadingOverlay) loadingOverlay.remove();
 }
+
 
 async function searchMovies(query) {
     const movieResults = document.getElementById('movie-results');

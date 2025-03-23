@@ -13,8 +13,10 @@ async function initializeSwitcher() {
     apiKeySwitcher = await loadApiKeys(); // استفاده از loadApiKeys سراسری
 }
 
+        
 async function getMovieDetails() {
     try {
+        showLoading(); // نمایش لودینگ قبل از شروع درخواست‌ها
         if (!movieId) {
             throw new Error('شناسه فیلم در URL وجود ندارد!');
         }
@@ -62,8 +64,8 @@ async function getMovieDetails() {
         const spokenLanguages = movieData.spoken_languages && movieData.spoken_languages.map((lang) => lang.english_name).join(', ') || 'نامشخص';
 
         // Update page content with TMDb data
-        document.getElementById('title').textContent = title + " " +  `(${year})`;
-        document.getElementById('overview').innerHTML =`<strong>خلاصه داستان :</strong> ${movieData.overview || 'خلاصه‌ای در دسترس نیست.'}`;
+        document.getElementById('title').textContent = title + " " + `(${year})`;
+        document.getElementById('overview').innerHTML = `<strong>خلاصه داستان :</strong> ${movieData.overview || 'خلاصه‌ای در دسترس نیست.'}`;
         document.getElementById('genre').innerHTML = `<strong>ژانر :</strong> ${movieData.genres ? movieData.genres.map(g => g.name).join(', ') : 'نامشخص'}`;
         document.getElementById('year').innerHTML = `<strong>سال تولید :</strong> ${year}`;
         document.getElementById('rating').innerHTML = `<strong>امتیاز :</strong> ${(movieData.vote_average || movieData.vote_average === 0) ? Number(movieData.vote_average).toFixed(1) : 'بدون امتیاز'}/10`;
@@ -71,7 +73,7 @@ async function getMovieDetails() {
         document.getElementById('spokenLanguages').innerHTML = `<strong>زبان فیلم :</strong> ${spokenLanguages}`;
         document.getElementById('budget').innerHTML = `<strong>بودجه فیلم :</strong> ${budget}`;
         document.getElementById('productionCountries').innerHTML = `<strong>محصول کشور :</strong> ${productionCountries}`;
-        document.getElementById('director').innerHTML = `<strong>کارگردان :</strong> ${directorName}`;        
+        document.getElementById('director').innerHTML = `<strong>کارگردان :</strong> ${directorName}`;
 
         // Update images (poster from OMDB, backdrop from TMDb)
         let posterUrl = poster;
@@ -145,6 +147,8 @@ async function getMovieDetails() {
     } catch (error) {
         console.error('خطا در دریافت اطلاعات:', error);
         document.getElementById('download-links').innerHTML = `<p class="text-red-500">خطا در دریافت اطلاعات: ${error.message}</p>`;
+    } finally {
+        hideLoading(); // مخفی کردن لودینگ بعد از اتمام درخواست‌ها
     }
 }
 
