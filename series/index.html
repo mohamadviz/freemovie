@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <meta name="description" content="فیری مووی - اطلاعات جدیدترین فیلم‌ها و سریال‌های پرطرفدار را ببینید و از لینک‌های دانلود الماس مووی استفاده کنید;">
     <meta name="keywords" content="فیری مووی, دانلود فیلم, سریال پرطرفدار, اطلاعات فیلم, الماس مووی">
     <meta name="robots" content="index, follow">
@@ -18,12 +17,10 @@
     <meta name="twitter:title" content="فیری مووی - صفحه اصلی">
     <meta name="twitter:description" content="اطلاعات فیلم‌ها و سریال‌ها با لینک دانلود از الماس مووی;">
     <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png">
-    
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
     <script src="/freemovie/analytics.js"></script>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"></script>
-    
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -103,27 +100,41 @@
             justify-content: center;
             gap: 1rem;
         }
-        /* استایل‌های لودینگ */
+        .related-series-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .related-series-card {
+            background: #374151;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .related-series-card:hover {
+            transform: scale(1.05);
+        }
+        .related-series-card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
         .popcorn { animation: bounce 1s infinite ease-in-out; }
         .popcorn-piece { transform-origin: center; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes pop { 0% { transform: scale(0.8) translateY(0); opacity: 0.8; } 50% { transform: scale(1.1) translateY(-15px); opacity: 1; } 100% { transform: scale(0.8) translateY(0); opacity: 0.8; } }
     </style>
-    <!-- اضافه کردن تگ schema -->
     <script type="application/ld+json" id="series-schema"></script>
 </head>
 <body class="min-h-screen flex flex-col">
-    <!-- هدر جدید مشابه صفحه اصلی -->
     <header class="bg-gray-800 p-4 shadow-md">
         <div class="container mx-auto flex flex-row justify-between items-center">
-            <!-- Navigation -->
             <nav class="flex items-center space-x-4">
                 <a href="/freemovie" class="hover:text-gray-300 p-4"><i class="fas fa-home"></i></a>
                 <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300"><i class="fas fa-bookmark"></i></a>
                 <a href="/freemovie/search/index.html" class="hover:text-gray-300"><i class="fas fa-search"></i></a>
                 <button id="theme-toggle" class="hover:text-gray-300"><i class="fas fa-sun"></i></button>
             </nav>
-            <!-- Logo -->
             <div>
                 <a href="https://m4tinbeigi-official.github.io/freemovie/">
                     <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگو" class="h-10">
@@ -132,7 +143,6 @@
         </div>
     </header>
 
-    <!-- محتوای اصلی صفحه سریال -->
     <main class="container mx-auto flex-1 py-12 bg-poster" id="series-bg">
         <article class="series-card flex flex-col md:flex-row gap-6">
             <img id="poster" src="https://via.placeholder.com/500" alt="پوستر سریال" class="w-full md:w-1/3 rounded-lg shadow-lg object-cover" loading="lazy">
@@ -151,39 +161,39 @@
 
         <section class="mt-12">
             <h2 class="text-center">تریلر</h2>
-            <div id="trailer" class="mt-4 flex justify-center">
-                <!-- محتوای تریلر توسط جاوااسکریپت اضافه می‌شود -->
-            </div>
+            <div id="trailer" class="mt-4 flex justify-center"></div>
         </section>
 
         <section class="series-card mt-12">
             <h2 class="text-center">لینک‌های دانلود</h2>
-            <div id="download-links" class="mt-6 space-y-4">
-                <!-- لینک‌های دانلود توسط جاوااسکریپت اضافه می‌شوند -->
-            </div>
+            <div id="download-links" class="mt-6 space-y-4"></div>
+        </section>
+
+        <!-- بخش جدید: سریال‌های مرتبط -->
+        <section class="series-card mt-12">
+            <h2 class="text-center">سریال‌های مرتبط</h2>
+            <div id="related-series" class="related-series-grid mt-6"></div>
         </section>
     </main>
+
     <footer class="bg-gray-800 p-4 mt-auto">
         <div class="container mx-auto text-center">
             <p>فیری مووی - دانلود رایگان فیلم و سریال</p>
         </div>
     </footer>
+
     <script src="../apiKeySwitcher.js"></script>
     <script>
-        // تابع نمایش لودینگ
         function showLoading() {
             document.body.insertAdjacentHTML('beforeend', `
                 <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
                     <div class="flex flex-col items-center">
                         <div class="popcorn mb-6">
                             <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                                <!-- جعبه پاپ‌کورن -->
                                 <rect x="16" y="32" width="32" height="24" rx="4" fill="#ffaa07" stroke="#1f2937" stroke-width="2"/>
                                 <rect x="12" y="28" width="40" height="8" rx="2" fill="#ffaa07"/>
-                                <!-- خطوط کلاسیک روی جعبه -->
                                 <path d="M16 32 L48 32" stroke="#1f2937" stroke-width="2"/>
                                 <path d="M16 36 L48 36" stroke="#1f2937" stroke-width="1"/>
-                                <!-- پاپ‌کورن‌های بیرون‌زده -->
                                 <circle cx="24" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out;"/>
                                 <circle cx="32" cy="20" r="5" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.2s;"/>
                                 <circle cx="40" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.4s;"/>
@@ -195,13 +205,11 @@
             `);
         }
 
-        // تابع حذف لودینگ
         function hideLoading() {
             const loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) loadingOverlay.remove();
         }
     </script>
     <script src="series.js"></script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9222a3910aec673c',t:'MTc0MjI3ODk4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
