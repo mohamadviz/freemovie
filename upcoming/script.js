@@ -9,7 +9,7 @@ let isLoading = false;
 
 const apiUrls = {
     upcomingMovies: `https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=fa-IR&page=`,
-    upcomingTv: `https://api.themoviedb.org/3/tv/on_the_air?api_key=${apiKey}&language=fa-IR&page=` // TMDb فاقد "upcoming TV" است، از on_the_air استفاده می‌کنیم
+    upcomingTv: `https://api.themoviedb.org/3/tv/on_the_air?api_key=${apiKey}&language=fa-IR&page=`
 };
 
 // کش تصاویر
@@ -30,6 +30,15 @@ function finishLoadingBar() {
     const loadingBar = document.getElementById('loading-bar');
     loadingBar.style.width = '100%';
     setTimeout(() => loadingBar.style.width = '0', 300);
+}
+
+// محاسبه روزهای باقی‌مانده
+function getDaysLeft(releaseDate) {
+    const today = new Date();
+    const release = new Date(releaseDate);
+    const diffTime = release - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 ? `${diffDays} روز دیگر` : 'منتشر شده';
 }
 
 // دریافت تصویر از کش یا OMDB
@@ -81,15 +90,17 @@ async function fetchContent(containerId, url, page, isInitial = false) {
             }
 
             const title = item.title || item.name || 'نامشخص';
-            const releaseDate = item.release_date || item.first_air_date || 'نامشخص';
+            const releaseDate = item.release_date || item.first_air_date || '';
+            const daysLeft = releaseDate ? getDaysLeft(releaseDate) : 'نامشخص';
             const overview = item.overview ? item.overview.slice(0, 100) + '...' : 'توضیحات موجود نیست';
 
             container.innerHTML += `
                 <div class="group relative">
                     <img src="${poster}" alt="${title}" class="w-full h-auto rounded-lg shadow-lg">
+                    <span class="days-left">${daysLeft}</span>
                     <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-center p-4">
                         <h3 class="text-lg font-bold text-white">${title}</h3>
-                        <p class="text-sm text-gray-200">تاریخ انتشار: ${releaseDate}</p>
+                        <p class="text-sm text-gray-200">تاریخ انتشار: ${releaseDate || 'نامشخص'}</p>
                         <p class="text-sm text-gray-200">${overview}</p>
                         <a href="/freemovie/${containerId.includes('movie') ? 'movie' : 'series'}/index.html?id=${item.id}" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">مشاهده</a>
                     </div>

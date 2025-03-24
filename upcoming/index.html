@@ -15,6 +15,10 @@
         .skeleton { background: #333; animation: pulse 1.5s infinite; height: 16rem; border-radius: 0.5rem; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         #loading-bar { position: fixed; top: 0; left: 0; height: 4px; background-color: #FFC107; width: 0; z-index: 9999; transition: width 0.3s ease; }
+        .content-container { display: flex; justify-content: space-between; gap: 2rem; }
+        .movies-column, .tv-column { width: 48%; }
+        .days-left { position: absolute; top: 10px; left: 10px; background: rgba(255, 193, 7, 0.9); color: #1a1a2e; padding: 0.5rem; border-radius: 0.25rem; font-weight: bold; }
+        @media (max-width: 768px) { .content-container { flex-direction: column; } .movies-column, .tv-column { width: 100%; } }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col">
@@ -40,27 +44,25 @@
     <main class="container mx-auto py-8 flex-1">
         <h1 class="text-3xl font-bold mb-8 text-center">فیلم‌ها و سریال‌های آینده</h1>
 
-        <!-- فیلم‌های آینده -->
-        <section>
-            <h2 class="text-2xl font-bold mb-4 text-center">فیلم‌های آینده</h2>
-            <div id="upcoming-movies" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 m-4">
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-            </div>
-        </section>
+        <div class="content-container m-4">
+            <!-- سریال‌ها (چپ) -->
+            <section class="tv-column">
+                <h2 class="text-2xl font-bold mb-4 text-center">سریال‌های آینده</h2>
+                <div id="upcoming-tv" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="skeleton w-full"></div>
+                    <div class="skeleton w-full"></div>
+                </div>
+            </section>
 
-        <!-- سریال‌های آینده -->
-        <section class="mt-12">
-            <h2 class="text-2xl font-bold mb-8 text-center">سریال‌های آینده</h2>
-            <div id="upcoming-tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 m-4">
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-                <div class="skeleton w-full"></div>
-            </div>
-        </section>
+            <!-- فیلم‌ها (راست) -->
+            <section class="movies-column">
+                <h2 class="text-2xl font-bold mb-4 text-center">فیلم‌های آینده</h2>
+                <div id="upcoming-movies" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="skeleton w-full"></div>
+                    <div class="skeleton w-full"></div>
+                </div>
+            </section>
+        </div>
 
         <!-- نشانگر لودینگ -->
         <div id="loading-more" class="text-center mt-8 hidden">
