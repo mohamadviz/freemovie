@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فیلم‌ها و سریال‌های آینده - فیری مووی</title>
+    <meta name="description" content="جدیدترین فیلم‌ها و سریال‌هایی که به زودی منتشر می‌شوند را در فیری مووی ببینید.">
+    <meta name="keywords" content="فیلم‌های آینده, سریال‌های آینده, فیری مووی, دانلود فیلم">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
+    <style>
+        body { font-family: 'Vazir', sans-serif; direction: rtl; background-color: #1a1a2e; color: #fff; }
+        .skeleton { background: #333; animation: pulse 1.5s infinite; height: 270px; border-radius: 0.5rem; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .content-grid img { aspect-ratio: 2/3; object-fit: cover; max-height: 270px; border-radius: 0.5rem; }
+        #loading-bar { position: fixed; top: 0; left: 0; height: 4px; background-color: #FFC107; width: 0; z-index: 9999; transition: width 0.3s ease; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- نوار پیشرفت -->
+    <div id="loading-bar"></div>
+
+    <!-- هدر -->
+    <header class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <nav class="flex items-center space-x-4">
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a>
+                <button id="theme-toggle" class="hover:text-gray-300" aria-label="تغییر تم"><i class="fas fa-moon"></i></button>
+            </nav>
+            <div>
+                <a href="https://m4tinbeigi-official.github.io/freemovie/">
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- بخش اصلی -->
+    <main class="container mx-auto py-8 flex-1">
+        <h1 class="text-3xl font-bold mb-8 text-center">فیلم‌ها و سریال‌های آینده</h1>
+
+        <!-- فیلم‌های آینده -->
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-center">فیلم‌های آینده</h2>
+            <div id="upcoming-movies" class="content-grid">
+                <!-- Skeleton placeholders -->
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+            </div>
+        </section>
+
+        <!-- سریال‌های آینده -->
+        <section class="mt-12">
+            <h2 class="text-2xl font-bold mb-4 text-center">سریال‌های آینده</h2>
+            <div id="upcoming-tv" class="content-grid">
+                <!-- Skeleton placeholders -->
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+                <div class="skeleton w-full"></div>
+            </div>
+        </section>
+
+        <!-- نشانگر لودینگ برای اسکرول -->
+        <div id="loading-more" class="text-center mt-8 hidden">
+            <i class="fas fa-spinner fa-spin text-2xl"></i>
+        </div>
+    </main>
+
+    <!-- فوتر -->
+    <footer class="bg-gray-800 p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>فیری مووی - ساخته شده با 🤍</p>
+        </div>
+    </footer>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
