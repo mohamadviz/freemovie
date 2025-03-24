@@ -1,27 +1,45 @@
-const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید API شما
-const baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید API TMDb
 const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie-300.png';
+let apiKeySwitcher;
 
-// تنظیمات API
+// تنظیمات صفحه‌بندی
 let moviePage = 1;
 let tvPage = 1;
 let isLoading = false;
 
 const apiUrls = {
     upcomingMovies: `https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=fa-IR&page=`,
-    upcomingTv: `https://api.themoviedb.org/3/tv/on_the_air?api_key=${apiKey}&language=fa-IR&page=` // توجه: TMDb endpoint مستقیمی برای "upcoming TV" ندارد، از "on_the_air" استفاده می‌کنیم
+    upcomingTv: `https://api.themoviedb.org/3/tv/on_the_air?api_key=${apiKey}&language=fa-IR&page=` // TMDb فاقد "upcoming TV" است، از on_the_air استفاده می‌کنیم
 };
 
+// کش تصاویر
+const imageCache = {};
+
+async function initializeSwitcher() {
+    apiKeySwitcher = await loadApiKeys();
+    console.log('سوئیچر کلید API مقداردهی شد');
+}
+
 // مدیریت نوار پیشرفت
-function updateLoadingBar(percentage) {
+function startLoadingBar() {
     const loadingBar = document.getElementById('loading-bar');
-    loadingBar.style.width = percentage + '%';
+    loadingBar.style.width = '30%';
 }
 
 function finishLoadingBar() {
     const loadingBar = document.getElementById('loading-bar');
     loadingBar.style.width = '100%';
     setTimeout(() => loadingBar.style.width = '0', 300);
+}
+
+// دریافت تصویر از کش یا OMDB
+async function getCachedImage(id, fetchFunction) {
+    if (imageCache[id] && imageCache[id] !== defaultPoster) {
+        return imageCache[id];
+    }
+    const poster = await fetchFunction();
+    if (poster !== defaultPoster) imageCache[id] = poster;
+    return poster;
 }
 
 // دریافت و نمایش محتوا
@@ -32,7 +50,7 @@ async function fetchContent(containerId, url, page, isInitial = false) {
     const loadingMore = document.getElementById('loading-more');
 
     if (!isInitial) loadingMore.classList.remove('hidden');
-    updateLoadingBar(30);
+    startLoadingBar();
 
     try {
         const response = await fetch(`${url}${page}`);
@@ -40,10 +58,28 @@ async function fetchContent(containerId, url, page, isInitial = false) {
         const data = await response.json();
         const items = data.results || [];
 
-        if (isInitial) container.innerHTML = ''; // پاکسازی اسکلتون‌ها در بارگذاری اولیه
+        if (isInitial) container.innerHTML = ''; // پاکسازی اسکلتون‌ها
 
-        items.forEach(item => {
-            const poster = item.poster_path ? `${baseImageUrl}${item.poster_path}` : defaultPoster;
+        for (const item of items) {
+            let poster = defaultPoster.replace(/300(?=\.jpg$)/i, '');
+            const detailsUrl = `https://api.themoviedb.org/3/${containerId.includes('movie') ? 'movie' : 'tv'}/${item.id}/external_ids?api_key=${apiKey}`;
+            try {
+                const detailsRes = await fetch(detailsUrl);
+                if (!detailsRes.ok) throw new Error(`خطای جزئیات: ${detailsRes.status}`);
+                const detailsData = await detailsRes.json();
+                const imdbId = detailsData.imdb_id || '';
+                if (imdbId) {
+                    poster = await getCachedImage(imdbId, async () => {
+                        const omdbData = await apiKeySwitcher.fetchWithKeySwitch(
+                            (key) => `https://www.omdbapi.com/?i=${imdbId}&apikey=${key}`
+                        );
+                        return omdbData.Poster && omdbData.Poster !== 'N/A' ? omdbData.Poster : defaultPoster;
+                    });
+                }
+            } catch (error) {
+                console.warn(`خطا در دریافت پوستر ${item.id}:`, error.message);
+            }
+
             const title = item.title || item.name || 'نامشخص';
             const releaseDate = item.release_date || item.first_air_date || 'نامشخص';
             const overview = item.overview ? item.overview.slice(0, 100) + '...' : 'توضیحات موجود نیست';
@@ -59,15 +95,14 @@ async function fetchContent(containerId, url, page, isInitial = false) {
                     </div>
                 </div>
             `;
-        });
-
-        finishLoadingBar();
+        }
     } catch (error) {
         console.error(`خطا در دریافت داده‌ها (${containerId}):`, error);
         container.innerHTML += '<p class="text-center text-red-500">خطایی رخ داد!</p>';
     } finally {
         isLoading = false;
         loadingMore.classList.add('hidden');
+        finishLoadingBar();
     }
 }
 
@@ -104,7 +139,8 @@ function manageThemeToggle() {
 }
 
 // اجرای اولیه
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeSwitcher();
     fetchContent('upcoming-movies', apiUrls.upcomingMovies, moviePage, true);
     fetchContent('upcoming-tv', apiUrls.upcomingTv, tvPage, true);
     manageThemeToggle();
