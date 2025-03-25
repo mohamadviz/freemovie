@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fa" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Movies & TV Shows - FreeMovie</title>
+    <meta name="description" content="Explore the latest upcoming movies and TV shows on FreeMovie. Get release dates, overviews, and more with infinite scroll for a seamless experience.">
+    <meta name="keywords" content="upcoming movies, upcoming tv shows, freemovie, فیلم‌های آینده, سریال‌های آینده">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
+    <style>
+        body { font-family: 'Vazir', sans-serif; direction: rtl; }
+        .skeleton { background: #333; animation: pulse 1.5s infinite; height: 16rem; border-radius: 0.5rem; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        #loading-bar { position: fixed; top: 0; left: 0; height: 4px; background-color: #FFC107; width: 0; z-index: 9999; transition: width 0.3s ease; }
+        .content-container { display: flex; justify-content: space-between; gap: 2rem; }
+        .movies-column, .tv-column { width: 48%; }
+        .days-left { position: absolute; top: 10px; left: 10px; background: rgba(255, 193, 7, 0.9); color: #1a1a2e; padding: 0.5rem; border-radius: 0.25rem; font-weight: bold; }
+        @media (max-width: 768px) { .content-container { flex-direction: column; } .movies-column, .tv-column { width: 100%; } }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <!-- نوار پیشرفت -->
+    <div id="loading-bar"></div>
+
+    <!-- هدر -->
+    <header class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <nav class="flex items-center space-x-4">
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a>
+                <button id="theme-toggle" class="hover:text-gray-300" aria-label="تغییر تم"><i class="fas fa-sun"></i></button>
+            </nav>
+            <div>
+                <a href="https://m4tinbeigi-official.github.io/freemovie/">
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- بخش اصلی -->
+    <main class="container mx-auto py-8 flex-1">
+        <h1 class="text-3xl font-bold mb-8 text-center">فیلم‌ها و سریال‌های آینده</h1>
+
+        <div class="content-container m-4">
+            <!-- سریال‌ها (چپ) -->
+            <section class="tv-column">
+                <h2 class="text-2xl font-bold mb-4 text-center">سریال‌های آینده</h2>
+                <div id="upcoming-tv" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="skeleton w-full"></div>
+                    <div class="skeleton w-full"></div>
+                </div>
+            </section>
+
+            <!-- فیلم‌ها (راست) -->
+            <section class="movies-column">
+                <h2 class="text-2xl font-bold mb-4 text-center">فیلم‌های آینده</h2>
+                <div id="upcoming-movies" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="skeleton w-full"></div>
+                    <div class="skeleton w-full"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- نشانگر لودینگ -->
+        <div id="loading-more" class="text-center mt-8 hidden">
+            <i class="fas fa-spinner fa-spin text-2xl"></i>
+        </div>
+    </main>
+
+    <!-- فوتر -->
+    <footer class="bg-gray-800 p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>فیری مووی - ساخته شده با 🤍</p>
+        </div>
+    </footer>
+
+    <script src="../apiKeySwitcher.js"></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
