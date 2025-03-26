@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات - فیری مووی</title>
+    <meta name="description" content="تنظیمات فیری مووی - توکن OMDB خود را وارد کنید.">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
+    <style>
+        body { font-family: 'Vazir', sans-serif; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; padding: 2rem; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <header class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <nav class="flex items-center space-x-4">
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a>
+                <a href="/freemovie/settings/index.html" class="hover:text-gray-300" aria-label="تنظیمات"><i class="fas fa-cog"></i></a>
+            </nav>
+            <div>
+                <a href="/freemovie">
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto py-8 flex-grow">
+        <h1 class="text-2xl font-bold mb-6 text-center">تنظیمات</h1>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">تنظیم توکن OMDB</h2>
+            <p class="text-gray-300 mb-4">
+                برای افزایش سرعت سایت و استفاده از توکن اختصاصی خودتان، می‌توانید یک توکن از 
+                <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" class="underline hover:text-gray-200">OMDB API</a> 
+                دریافت کنید. پس از ثبت‌نام، ایمیل خود را تأیید کنید و توکن را در کادر زیر وارد کنید.
+            </p>
+            <div class="mb-4">
+                <label for="omdb-token" class="block text-gray-200 mb-2">توکن OMDB:</label>
+                <input type="text" id="omdb-token" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="توکن خود را وارد کنید">
+            </div>
+            <button id="save-token" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ذخیره توکن</button>
+            <button id="clear-token" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2">حذف توکن</button>
+            <p id="status-message" class="mt-4 text-sm"></p>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>فیری مووی - ساخته شده با 🤍</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tokenInput = document.getElementById('omdb-token');
+            const saveButton = document.getElementById('save-token');
+            const clearButton = document.getElementById('clear-token');
+            const statusMessage = document.getElementById('status-message');
+
+            // بارگذاری توکن ذخیره‌شده
+            const savedToken = localStorage.getItem('userOmdbToken');
+            if (savedToken) {
+                tokenInput.value = savedToken;
+                statusMessage.textContent = 'توکن شما قبلاً ذخیره شده است.';
+                statusMessage.className = 'text-green-500';
+            }
+
+            // ذخیره توکن
+            saveButton.addEventListener('click', () => {
+                const token = tokenInput.value.trim();
+                if (token) {
+                    localStorage.setItem('userOmdbToken', token);
+                    statusMessage.textContent = 'توکن با موفقیت ذخیره شد!';
+                    statusMessage.className = 'text-green-500';
+                } else {
+                    statusMessage.textContent = 'لطفاً یک توکن معتبر وارد کنید.';
+                    statusMessage.className = 'text-red-500';
+                }
+            });
+
+            // حذف توکن
+            clearButton.addEventListener('click', () => {
+                localStorage.removeItem('userOmdbToken');
+                tokenInput.value = '';
+                statusMessage.textContent = 'توکن حذف شد.';
+                statusMessage.className = 'text-yellow-500';
+            });
+        });
+    </script>
+</body>
+</html>
