@@ -1,15 +1,16 @@
 // script.js
-const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید API TMDb
-const language = 'fa'; // زبان پارسی
-const baseImageUrl = 'https://image.tmdb.org/t/p/w500'; // آدرس پایه تصاویر TMDb
-const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie-300.png'; // پوستر پیش‌فرض
+const defaultApiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید پیش‌فرض TMDb
+const userTmdbToken = localStorage.getItem('userTmdbToken'); // توکن کاربر
+const apiKey = userTmdbToken || defaultApiKey; // اولویت با توکن کاربر
+const language = 'fa';
+const baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie-300.png';
 
 // آدرس‌های API TMDb
 const apiUrls = {
     now_playing: `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&language=${language}`,
     tv_trending: `https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}&language=${language}`
 };
-
 // شیء کش برای ذخیره تصاویر
 const imageCache = {};
 
