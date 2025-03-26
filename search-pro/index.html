@@ -5,67 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>فیری مووی - جستجوی پیشرفته</title>
 
-    <meta
-      name="description"
-      content="فیری مووی - جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای دلخواه."
-    />
-    <meta
-      name="keywords"
-      content="فیری مووی, جستجوی پیشرفته, دانلود فیلم, سریال, فیلتر فیلم"
-    />
+    <meta name="description" content="فیری مووی - جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای دقیق." />
+    <meta name="keywords" content="فیری مووی, جستجوی پیشرفته, دانلود فیلم, سریال, فیلتر ژانر, فیلتر کشور" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="تیم فیری مووی" />
-    <link
-      rel="canonical"
-      href="https://m4tinbeigi-official.github.io/freemovie/search-pro/"
-    />
+    <link rel="canonical" href="https://m4tinbeigi-official.github.io/freemovie/search-pro/" />
     <meta property="og:title" content="فیری مووی - جستجوی پیشرفته" />
-    <meta
-      property="og:description"
-      content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای ژانر، کشور و امتیاز."
-    />
-    <meta
-      property="og:image"
-      content="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-    />
-    <meta
-      property="og:url"
-      content="https://m4tinbeigi-official.github.io/freemovie/search-pro/"
-    />
+    <meta property="og:description" content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای ژانر و کشور." />
+    <meta property="og:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png" />
+    <meta property="og:url" content="https://m4tinbeigi-official.github.io/freemovie/search-pro/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="فیری مووی - جستجوی پیشرفته" />
-    <meta
-      name="twitter:description"
-      content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با لینک دانلود."
-    />
-    <meta
-      name="twitter:image"
-      content="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-    />
+    <meta name="twitter:description" content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با لینک دانلود." />
+    <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png" />
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link rel="icon" href="/freemovie/fav/favicon.ico    <script src="/freemovie/analytics.js"></script>
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"
-    ></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico" />
+    <script src="/freemovie/analytics.js"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"></script>
     <style>
       body {
         font-family: "Vazir", sans-serif;
         direction: rtl;
+        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
       }
       .skeleton {
         background: #333;
@@ -82,19 +47,15 @@
         display: flex;
         justify-content: space-between;
         gap: 2rem;
+        padding: 0 1rem;
       }
       .search-column {
         flex: 1;
       }
       .grid-container {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
-      }
-      @media (min-width: 768px) {
-        .grid-container {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
       }
       @media (max-width: 640px) {
         .search-container {
@@ -120,46 +81,103 @@
       .search-form {
         background: #1f2937;
         border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        margin: 2rem 1rem;
+        transition: transform 0.3s ease;
+      }
+      .search-form:hover {
+        transform: translateY(-5px);
+      }
+      .section-title {
+        color: #60a5fa;
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-align: center;
       }
       .checkbox-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 0.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.75rem;
       }
       .checkbox-label {
         display: flex;
         align-items: center;
-        padding: 0.5rem;
+        padding: 0.75rem;
         background: #374151;
         border-radius: 0.5rem;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.3s ease;
       }
       .checkbox-label:hover {
         background: #4b5563;
+        transform: scale(1.02);
       }
       input[type="checkbox"]:checked + span {
         color: #3b82f6;
+        font-weight: bold;
+      }
+      input[type="checkbox"] {
+        display: none;
+      }
+      .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+      .radio-label {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: #374151;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .radio-label:hover {
+        background: #4b5563;
+      }
+      input[type="radio"]:checked + span {
+        color: #3b82f6;
+        font-weight: bold;
+      }
+      input[type="number"] {
+        background: #374151;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+      input[type="number"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+      }
+      button {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
       }
     </style>
   </head>
-  <body class="bg-gray-900 text-white min-h-screen flex flex-col">
+  <body class="min-h-screen flex flex-col text-white">
     <header class="bg-gray-800 p-4 shadow-md">
-      <div class="container mx-auto flex flex-row justify-between items-center">
+      <div class="container mx-auto flex justify-between items-center">
         <nav class="flex items-center space-x-4">
-          <a href="/freemovie" class="hover:text-gray-300 p-4"><i class="fas fa-home"></i></a>
-          <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300"><i class="fas fa-bookmark"></i></a>
-          <a href="/freemovie/search/index.html" class="hover:text-gray-300"><i class="fas fa-search"></i></a>
+          <a href="/freemovie" class="hover:text-blue-400 p-4 transition-colors"><i class="fas fa-home"></i></a>
+          <a href="/freemovie/watchlist/index.html" class="hover:text-blue-400 transition-colors"><i class="fas fa-bookmark"></i></a>
+          <a href="/freemovie/search/index.html" class="hover:text-blue-400 transition-colors"><i class="fas fa-search"></i></a>
         </nav>
         <div>
           <a href="https://m4tinbeigi-official.github.io/freemovie/">
-            <img
-              src="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-              alt="لوگو"
-              class="h-10"
-            />
+            <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگو" class="h-10" />
           </a>
         </div>
       </div>
@@ -167,22 +185,22 @@
 
     <main class="container mx-auto flex-1 py-8">
       <!-- فرم جستجوی پیشرفته -->
-      <div class="search-form mx-4">
-        <h2 class="text-xl font-bold mb-4 text-center text-blue-400">جستجوی پیشرفته</h2>
-        
+      <div class="search-form">
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-400">جستجوی پیشرفته</h2>
+
         <!-- نوع محتوا -->
-        <div class="mb-6">
-          <label class="block text-white mb-2">نوع محتوا:</label>
-          <div class="flex flex-wrap gap-4">
-            <label class="flex items-center">
-              <input type="radio" name="content-type" value="movie" class="mr-2" checked>
+        <div class="mb-8">
+          <h3 class="section-title">نوع محتوا</h3>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="content-type" value="movie" checked class="mr-2">
               <span>فقط فیلم</span>
             </label>
-            <label class="flex items-center">
+            <label class="radio-label">
               <input type="radio" name="content-type" value="tv" class="mr-2">
               <span>فقط سریال</span>
             </label>
-            <label class="flex items-center">
+            <label class="radio-label">
               <input type="radio" name="content-type" value="both" class="mr-2">
               <span>هر دو</span>
             </label>
@@ -190,192 +208,235 @@
         </div>
 
         <!-- ژانرهای مورد نظر -->
-        <div class="mb-6">
-          <label class="block text-white mb-2">ژانرهای مورد نظر:</label>
+        <div class="mb-8">
+          <h3 class="section-title">ژانرهای مورد نظر</h3>
           <div class="checkbox-grid">
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="28" class="hidden">
+              <input type="checkbox" name="with-genres" value="28">
               <span>اکشن</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="12" class="hidden">
+              <input type="checkbox" name="with-genres" value="12">
               <span>ماجراجویی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="16" class="hidden">
+              <input type="checkbox" name="with-genres" value="16">
               <span>انیمیشن</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="35" class="hidden">
+              <input type="checkbox" name="with-genres" value="35">
               <span>کمدی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="80" class="hidden">
+              <input type="checkbox" name="with-genres" value="80">
               <span>جنایی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="18" class="hidden">
+              <input type="checkbox" name="with-genres" value="18">
               <span>درام</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="10751" class="hidden">
+              <input type="checkbox" name="with-genres" value="10751">
               <span>خانوادگی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="14" class="hidden">
+              <input type="checkbox" name="with-genres" value="14">
               <span>فانتزی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="27" class="hidden">
+              <input type="checkbox" name="with-genres" value="27">
               <span>ترسناک</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="10402" class="hidden">
+              <input type="checkbox" name="with-genres" value="10402">
               <span>موزیکال</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="9648" class="hidden">
+              <input type="checkbox" name="with-genres" value="9648">
               <span>رازآلود</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="10749" class="hidden">
+              <input type="checkbox" name="with-genres" value="10749">
               <span>عاشقانه</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="878" class="hidden">
+              <input type="checkbox" name="with-genres" value="878">
               <span>علمی-تخیلی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="53" class="hidden">
+              <input type="checkbox" name="with-genres" value="53">
               <span>هیجان‌انگیز</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="10752" class="hidden">
+              <input type="checkbox" name="with-genres" value="10752">
               <span>جنگی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="with-genres" value="37" class="hidden">
+              <input type="checkbox" name="with-genres" value="37">
               <span>وسترن</span>
             </label>
           </div>
         </div>
 
         <!-- ژانرهای ناخواسته -->
-        <div class="mb-6">
-          <label class="block text-white mb-2">ژانرهای ناخواسته:</label>
+        <div class="mb-8">
+          <h3 class="section-title">ژانرهای ناخواسته</h3>
           <div class="checkbox-grid">
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="28" class="hidden">
+              <input type="checkbox" name="without-genres" value="28">
               <span>اکشن</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="12" class="hidden">
+              <input type="checkbox" name="without-genres" value="12">
               <span>ماجراجویی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="16" class="hidden">
+              <input type="checkbox" name="without-genres" value="16">
               <span>انیمیشن</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="35" class="hidden">
+              <input type="checkbox" name="without-genres" value="35">
               <span>کمدی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="80" class="hidden">
+              <input type="checkbox" name="without-genres" value="80">
               <span>جنایی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="18" class="hidden">
+              <input type="checkbox" name="without-genres" value="18">
               <span>درام</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="10751" class="hidden">
+              <input type="checkbox" name="without-genres" value="10751">
               <span>خانوادگی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="14" class="hidden">
+              <input type="checkbox" name="without-genres" value="14">
               <span>فانتزی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="27" class="hidden">
+              <input type="checkbox" name="without-genres" value="27">
               <span>ترسناک</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="10402" class="hidden">
+              <input type="checkbox" name="without-genres" value="10402">
               <span>موزیکال</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="9648" class="hidden">
+              <input type="checkbox" name="without-genres" value="9648">
               <span>رازآلود</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="10749" class="hidden">
+              <input type="checkbox" name="without-genres" value="10749">
               <span>عاشقانه</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="878" class="hidden">
+              <input type="checkbox" name="without-genres" value="878">
               <span>علمی-تخیلی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="53" class="hidden">
+              <input type="checkbox" name="without-genres" value="53">
               <span>هیجان‌انگیز</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="10752" class="hidden">
+              <input type="checkbox" name="without-genres" value="10752">
               <span>جنگی</span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" name="without-genres" value="37" class="hidden">
+              <input type="checkbox" name="without-genres" value="37">
               <span>وسترن</span>
             </label>
           </div>
         </div>
 
-        <!-- کشور تولید -->
-        <div class="mb-6">
-          <label class="block text-white mb-2">کشور تولید:</label>
-          <select id="with-country" class="p-2 bg-gray-800 text-white rounded w-full">
-            <option value="">همه</option>
-            <option value="US">آمریکا</option>
-            <option value="IR">ایران</option>
-            <option value="GB">بریتانیا</option>
-            <option value="FR">فرانسه</option>
-            <option value="JP">ژاپن</option>
-            <option value="KR">کره جنوبی</option>
-            <option value="IN">هند</option>
-          </select>
+        <!-- کشورهای مورد نظر -->
+        <div class="mb-8">
+          <h3 class="section-title">کشورهای مورد نظر</h3>
+          <div class="checkbox-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="US">
+              <span>آمریکا</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="IR">
+              <span>ایران</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="GB">
+              <span>بریتانیا</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="FR">
+              <span>فرانسه</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="JP">
+              <span>ژاپن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="KR">
+              <span>کره جنوبی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-countries" value="IN">
+              <span>هند</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- کشورهای ناخواسته -->
+        <div class="mb-8">
+          <h3 class="section-title">کشورهای ناخواسته</h3>
+          <div class="checkbox-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="US">
+              <span>آمریکا</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="IR">
+              <span>ایران</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="GB">
+              <span>بریتانیا</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="FR">
+              <span>فرانسه</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="JP">
+              <span>ژاپن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="KR">
+              <span>کره جنوبی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-countries" value="IN">
+              <span>هند</span>
+            </label>
+          </div>
         </div>
 
         <!-- حداقل امتیاز -->
-        <div class="mb-6">
-          <label class="block text-white mb-2">حداقل امتیاز:</label>
-          <input
-            type="number"
-            id="min-vote"
-            min="0"
-            max="10"
-            step="0.1"
-            class="p-2 bg-gray-800 text-white rounded w-full"
-            placeholder="مثلاً 7"
-          />
+        <div class="mb-8">
+          <h3 class="section-title">حداقل امتیاز</h3>
+          <input type="number" id="min-vote" min="0" max="10" step="0.1" class="text-white" placeholder="مثلاً 7" />
         </div>
 
         <!-- دکمه جستجو -->
-        <button
-          id="advanced-search-button"
-          class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 w-full sm:w-auto"
-        >
-          <i class="fas fa-search"></i> جستجو
-        </button>
+        <div class="text-center">
+          <button id="advanced-search-button" class="text-white">
+            <i class="fas fa-search mr-2"></i> جستجو
+          </button>
+        </div>
       </div>
 
       <!-- نتایج جستجو -->
-      <div class="search-container m-12">
+      <div class="search-container">
         <section class="search-column">
-          <h2
-            id="movie-title"
-            class="text-sm sm:text-lg md:text-xl xl:text-2xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-1"
-          >
+          <h2 id="movie-title" class="text-xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-2">
             نتایج جستجو فیلم
           </h2>
           <div id="movie-results" class="grid-container">
@@ -384,10 +445,7 @@
           </div>
         </section>
         <section class="search-column">
-          <h2
-            id="tv-title"
-            class="text-sm sm:text-lg md:text-xl xl:text-2xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-1"
-          >
+          <h2 id="tv-title" class="text-xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-2">
             نتایج جستجو سریال
           </h2>
           <div id="tv-results" class="grid-container"></div>
@@ -401,7 +459,6 @@
       </div>
     </footer>
 
-    <!-- اسکریپت‌ها -->
     <script src="../apiKeySwitcher.js"></script>
     <script src="search-pro.js"></script>
     <script>
@@ -426,14 +483,12 @@
           a.style.visibility = "hidden";
           document.body.appendChild(a);
           if ("loading" !== document.readyState) c();
-          else if (window.addEventListener)
-            document.addEventListener("DOMContentLoaded", c);
+          else if (window.addEventListener) document.addEventListener("DOMContentLoaded", c);
           else {
             var e = document.onreadystatechange || function () {};
             document.onreadystatechange = function (b) {
               e(b);
-              "loading" !== document.readyState &&
-                ((document.onreadystatechange = e), c());
+              "loading" !== document.readyState && ((document.onreadystatechange = e), c());
             };
           }
         }
