@@ -34,17 +34,19 @@
         <div class="bg-gray-800 p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-semibold mb-4">تنظیم توکن‌های API</h2>
             <p class="text-gray-300 mb-4">
-                برای افزایش سرعت و استفاده از توکن‌های اختصاصی، توکن‌های خود را از 
+                با وارد کردن توکن OMDB از 
                 <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" class="underline hover:text-gray-200">OMDB API</a> 
-                و <a href="https://www.themoviedb.org/settings/api" target="_blank" class="underline hover:text-gray-200">TMDb API</a> 
-                دریافت کنید. پس از ثبت‌نام و تأیید ایمیل، توکن‌ها را در کادرهای زیر وارد کنید.
+                تا ۹۰٪ سرعت سایت رو بیشتر کنید! کافیه ثبت‌نام کنید، ایمیل رو تأیید کنید و توکن رو اینجا بذارید. 
+                توکن TMDb از 
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" class="underline hover:text-gray-200">TMDb API</a> 
+                اختیاریه و نیازی بهش نیست، ولی اگه خواستید می‌تونید اضافه کنید.
             </p>
             <div class="mb-4">
                 <label for="omdb-token" class="block text-gray-200 mb-2">توکن OMDB:</label>
                 <input type="text" id="omdb-token" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="توکن OMDB خود را وارد کنید">
             </div>
             <div class="mb-4">
-                <label for="tmdb-token" class="block text-gray-200 mb-2">توکن TMDb:</label>
+                <label for="tmdb-token" class="block text-gray-200 mb-2">توکن TMDb (اختیاری):</label>
                 <input type="text" id="tmdb-token" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="توکن TMDb خود را وارد کنید">
             </div>
             <button id="save-tokens" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ذخیره توکن‌ها</button>
@@ -89,7 +91,7 @@
                     message = 'توکن‌ها با موفقیت ذخیره شدند!';
                     statusMessage.className = 'text-green-500';
                 } else {
-                    message = 'لطفاً حداقل یک توکن معتبر وارد کنید.';
+                    message = 'لطفاً حداقل یک توکن وارد کنید.';
                     statusMessage.className = 'text-red-500';
                 }
                 statusMessage.textContent = message;
