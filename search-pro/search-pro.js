@@ -52,7 +52,6 @@ function hideLoading() {
 }
 
 async function advancedSearch() {
-  const contentType = document.querySelector('input[name="content-type"]:checked').value;
   const withGenres = Array.from(document.querySelectorAll('input[name="with-genres"]:checked')).map(input => input.value).join(',');
   const withoutGenres = Array.from(document.querySelectorAll('input[name="without-genres"]:checked')).map(input => input.value).join(',');
   const withCountries = Array.from(document.querySelectorAll('input[name="with-countries"]:checked')).map(input => input.value);
@@ -60,37 +59,22 @@ async function advancedSearch() {
   const minVote = document.getElementById('min-vote').value;
 
   const movieResults = document.getElementById('movie-results');
-  const tvResults = document.getElementById('tv-results');
   const movieTitle = document.getElementById('movie-title');
-  const tvTitle = document.getElementById('tv-title');
 
   showLoading();
 
   try {
-    let movieUrl = contentType !== 'tv' ? `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc` : null;
-    let tvUrl = contentType !== 'movie' ? `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc` : null;
+    let movieUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc`;
 
-    const applyFilters = (url) => {
-      if (withGenres) url += `&with_genres=${withGenres}`;
-      if (withoutGenres) url += `&without_genres=${withoutGenres}`;
-      if (withCountries.length > 0) url += `&with_origin_country=${withCountries.join('|')}`;
-      if (minVote) url += `&vote_average.gte=${minVote}`;
-      return url;
-    };
+    if (withGenres) movieUrl += `&with_genres=${withGenres}`;
+    if (withoutGenres) movieUrl += `&without_genres=${withoutGenres}`;
+    if (withCountries.length > 0) movieUrl += `&with_origin_country=${withCountries.join('|')}`;
+    if (minVote) movieUrl += `&vote_average.gte=${minVote}`;
 
-    if (movieUrl) movieUrl = applyFilters(movieUrl);
-    if (tvUrl) tvUrl = applyFilters(tvUrl);
+    const res = await fetch(movieUrl);
+    if (!res.ok) throw new Error(`خطای سرور: ${res.status}`);
+    const movieRes = await res.json();
 
-    const fetchData = async (url) => {
-      if (!url) return { results: [] };
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`خطای سرور: ${res.status}`);
-      return res.json();
-    };
-
-    const [movieRes, tvRes] = await Promise.all([fetchData(movieUrl), fetchData(tvUrl)]);
-
-    // فیلتر کردن کشورهای ناخواسته به صورت دستی (چون TMDb این امکان را مستقیماً ندارد)
     const filterCountries = (items, excludedCountries) => {
       return items.filter(item => {
         const countries = item.origin_country || [];
@@ -99,41 +83,13 @@ async function advancedSearch() {
     };
 
     const movies = filterCountries(movieRes.results || [], withoutCountries);
-    const tvSeries = filterCountries(tvRes.results || [], withoutCountries);
 
     movieResults.innerHTML = '';
-    tvResults.innerHTML = '';
-    movieTitle.textContent = contentType !== 'tv' ? 'نتایج جستجو فیلم' : 'نتایج جستجو فیلم (غیرفعال)';
-    tvTitle.textContent = contentType !== 'movie' ? 'نتایج جستجو سریال' : 'نتایج جستجو سریال (غیرفعال)';
+    movieTitle.textContent = 'نتایج جستجو فیلم';
 
     const seenIds = new Set();
 
-    if (tvSeries.length > 0 && contentType !== 'movie') {
-      for (const tv of tvSeries) {
-        if (seenIds.has(tv.id)) continue;
-        seenIds.add(tv.id);
-
-        let poster = tv.poster_path ? `${baseImageUrl}${tv.poster_path}` : defaultPoster;
-        const tvId = tv.id;
-        const title = tv.name || 'نامشخص';
-        const year = tv.first_air_date ? tv.first_air_date.substr(0, 4) : 'نامشخص';
-
-        tvResults.innerHTML += `
-          <div class="group relative">
-            <img src="${poster}" alt="${title}" class="w-full h-auto rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105">
-            <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-center p-4">
-              <h3 class="text-lg font-bold">${title}</h3>
-              <p class="text-sm">${year}</p>
-              <a href="../series/index.html?id=${tvId}" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">مشاهده</a>
-            </div>
-          </div>
-        `;
-      }
-    } else if (contentType !== 'movie') {
-      tvResults.innerHTML = '<p class="text-center text-red-500">سریالی یافت نشد!</p>';
-    }
-
-    if (movies.length > 0 && contentType !== 'tv') {
+    if (movies.length > 0) {
       for (const movie of movies) {
         if (seenIds.has(movie.id)) continue;
         seenIds.add(movie.id);
@@ -154,13 +110,12 @@ async function advancedSearch() {
           </div>
         `;
       }
-    } else if (contentType !== 'tv') {
+    } else {
       movieResults.innerHTML = '<p class="text-center text-red-500">فیلمی یافت نشد!</p>';
     }
   } catch (error) {
     console.error('خطا در جستجوی پیشرفته:', error);
-    movieResults.innerHTML = contentType !== 'tv' ? '<p class="text-center text-red-500">خطایی رخ داد!</p>' : '';
-    tvResults.innerHTML = contentType !== 'movie' ? '<p class="text-center text-red-500">خطایی رخ داد!</p>' : '';
+    movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد!</p>';
   } finally {
     hideLoading();
   }

@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>فیری مووی - جستجوی پیشرفته</title>
+    <title>فیری مووی - جستجوی پیشرفته فیلم</title>
 
-    <meta name="description" content="فیری مووی - جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای دقیق." />
-    <meta name="keywords" content="فیری مووی, جستجوی پیشرفته, دانلود فیلم, سریال, فیلتر ژانر, فیلتر کشور" />
+    <meta name="description" content="فیری مووی - جستجوی پیشرفته فیلم‌ها با فیلترهای دقیق." />
+    <meta name="keywords" content="فیری مووی, جستجوی پیشرفته, دانلود فیلم, فیلتر ژانر, فیلتر کشور" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="تیم فیری مووی" />
     <link rel="canonical" href="https://m4tinbeigi-official.github.io/freemovie/search-pro/" />
-    <meta property="og:title" content="فیری مووی - جستجوی پیشرفته" />
-    <meta property="og:description" content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با فیلترهای ژانر و کشور." />
+    <meta property="og:title" content="فیری مووی - جستجوی پیشرفته فیلم" />
+    <meta property="og:description" content="جستجوی پیشرفته فیلم‌ها با فیلترهای ژانر و کشور." />
     <meta property="og:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png" />
     <meta property="og:url" content="https://m4tinbeigi-official.github.io/freemovie/search-pro/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="فیری مووی - جستجوی پیشرفته" />
-    <meta name="twitter:description" content="جستجوی پیشرفته فیلم‌ها و سریال‌ها با لینک دانلود." />
+    <meta name="twitter:title" content="فیری مووی - جستجوی پیشرفته فیلم" />
+    <meta name="twitter:description" content="جستجوی پیشرفته فیلم‌ها با لینک دانلود." />
     <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png" />
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
@@ -43,24 +43,11 @@
         50% { opacity: 1; }
         100% { opacity: 0.5; }
       }
-      .search-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 2rem;
-        padding: 0 1rem;
-      }
-      .search-column {
-        flex: 1;
-      }
       .grid-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 1.5rem;
-      }
-      @media (max-width: 640px) {
-        .search-container {
-          flex-direction: column;
-        }
+        padding: 0 1rem;
       }
       .popcorn {
         animation: bounce 1s infinite ease-in-out;
@@ -121,28 +108,6 @@
       input[type="checkbox"] {
         display: none;
       }
-      .radio-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        justify-content: center;
-      }
-      .radio-label {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        background: #374151;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      .radio-label:hover {
-        background: #4b5563;
-      }
-      input[type="radio"]:checked + span {
-        color: #3b82f6;
-        font-weight: bold;
-      }
       input[type="number"] {
         background: #374151;
         border: none;
@@ -186,26 +151,7 @@
     <main class="container mx-auto flex-1 py-8">
       <!-- فرم جستجوی پیشرفته -->
       <div class="search-form">
-        <h2 class="text-2xl font-bold mb-6 text-center text-blue-400">جستجوی پیشرفته</h2>
-
-        <!-- نوع محتوا -->
-        <div class="mb-8">
-          <h3 class="section-title">نوع محتوا</h3>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="content-type" value="movie" checked class="mr-2">
-              <span>فقط فیلم</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="content-type" value="tv" class="mr-2">
-              <span>فقط سریال</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="content-type" value="both" class="mr-2">
-              <span>هر دو</span>
-            </label>
-          </div>
-        </div>
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-400">جستجوی پیشرفته فیلم</h2>
 
         <!-- ژانرهای مورد نظر -->
         <div class="mb-8">
@@ -434,28 +380,20 @@
       </div>
 
       <!-- نتایج جستجو -->
-      <div class="search-container">
-        <section class="search-column">
-          <h2 id="movie-title" class="text-xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-2">
-            نتایج جستجو فیلم
-          </h2>
-          <div id="movie-results" class="grid-container">
-            <div class="skeleton"></div>
-            <div class="skeleton"></div>
-          </div>
-        </section>
-        <section class="search-column">
-          <h2 id="tv-title" class="text-xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-2">
-            نتایج جستجو سریال
-          </h2>
-          <div id="tv-results" class="grid-container"></div>
-        </section>
-      </div>
+      <section class="m-12">
+        <h2 id="movie-title" class="text-xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-2">
+          نتایج جستجو فیلم
+        </h2>
+        <div id="movie-results" class="grid-container">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </section>
     </main>
 
     <footer class="bg-gray-800 p-4 mt-auto">
       <div class="container mx-auto text-center">
-        <p>فیری مووی - دانلود رایگان فیلم و سریال</p>
+        <p>فیری مووی - دانلود رایگان فیلم</p>
       </div>
     </footer>
 
