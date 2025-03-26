@@ -18,6 +18,7 @@ class ApiKeySwitcher {
 
     switchToNextKey() {
         if (this.userToken) {
+            console.log('توکن کاربر استفاده می‌شود، تعویض کلید غیرفعال است.');
             return; // اگر توکن کاربر باشد، تعویض کلید غیرفعال است
         }
         this.currentIndex = (this.currentIndex + 1) % this.keys.length;
