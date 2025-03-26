@@ -13,6 +13,7 @@ async function initializeSwitcher() {
     apiKeySwitcher = await loadApiKeys(); // استفاده از loadApiKeys سراسری
 }
 
+        
 async function getMovieDetails() {
     try {
         showLoading(); // نمایش لودینگ قبل از شروع درخواست‌ها
@@ -73,15 +74,6 @@ async function getMovieDetails() {
         document.getElementById('budget').innerHTML = `<strong>بودجه فیلم :</strong> ${budget}`;
         document.getElementById('productionCountries').innerHTML = `<strong>محصول کشور :</strong> ${productionCountries}`;
         document.getElementById('director').innerHTML = `<strong>کارگردان :</strong> ${directorName}`;
-
-        // Add IMDb link
-        const imdbLink = imdbID ? `https://www.imdb.com/title/${imdbID}/` : '#';
-        document.getElementById('imdb-link').innerHTML = `
-            <a href="${imdbLink}" target="_blank" class="flex items-center text-yellow-500 hover:text-yellow-600">
-                <img src="https://www.imdb.com/favicon.ico" alt="IMDb Logo" class="w-5 h-5 ml-2">
-                <span>صفحه IMDb</span>
-            </a>
-        `;
 
         // Update images (poster from OMDB, backdrop from TMDb)
         let posterUrl = poster;

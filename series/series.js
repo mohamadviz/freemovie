@@ -68,15 +68,6 @@ async function getSeriesDetails() {
         const ratingElement = document.getElementById('rating');
         if (ratingElement) ratingElement.innerHTML = `<strong>امتیاز:</strong> ${seriesData.vote_average ? Number(seriesData.vote_average).toFixed(1) : 'نامشخص'}/10`;
 
-        // Add IMDb link
-        const imdbLink = imdbId ? `https://www.imdb.com/title/${imdbId}/` : '#';
-        document.getElementById('imdb-link').innerHTML = `
-            <a href="${imdbLink}" target="_blank" class="flex items-center text-yellow-500 hover:text-yellow-600 justify-center">
-                <img src="https://www.imdb.com/favicon.ico" alt="IMDb Logo" class="w-5 h-5 ml-2">
-                <span>صفحه IMDb</span>
-            </a>
-        `;
-
         let posterUrl = poster;
         posterUrl = posterUrl.replace(/300(?=\.jpg$)/i, '');
         const posterElement = document.getElementById('poster');
