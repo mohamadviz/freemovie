@@ -1,5 +1,5 @@
 // script.js
-cconst defaultApiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید پیش‌فرض TMDb
+const defaultApiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // کلید پیش‌فرض TMDb
 const userTmdbToken = localStorage.getItem('userTmdbToken'); // توکن کاربر
 const apiKey = userTmdbToken || defaultApiKey; // اولویت با توکن کاربر
 const language = 'fa';
