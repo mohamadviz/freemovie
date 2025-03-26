@@ -1,12 +1,15 @@
 // search-pro.js
-const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // TMDb API key
-const language = 'fa-IR'; // زبان فارسی (ایران)
-const baseImageUrl = 'https://image.tmdb.org/t/p/w500'; // URL پایه تصاویر TMDb
-const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png'; // پوستر پیش‌فرض
+const apiKey = '1dc4cbf81f0accf4fa108820d551dafc';
+const language = 'fa-IR';
+const baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png';
 
-let apiKeySwitcher; // متغیر سراسری برای سوئیچر کلید API
+let apiKeySwitcher;
 
-// تابع برای دریافت یا ذخیره تصویر از/در کش با استفاده از localStorage
+async function initializeSwitcher() {
+  apiKeySwitcher = await loadApiKeys();
+}
+
 function getCachedImage(id, fetchFunction) {
   const cachedImage = localStorage.getItem(`image_${id}`);
   if (cachedImage && cachedImage !== defaultPoster) {
@@ -22,12 +25,6 @@ function getCachedImage(id, fetchFunction) {
   });
 }
 
-// مقداردهی اولیه سوئیچر کلید API
-async function initializeSwitcher() {
-  apiKeySwitcher = await loadApiKeys(); // فرض بر این است که loadApiKeys در apiKeySwitcher.js تعریف شده
-}
-
-// تابع نمایش لودینگ
 function showLoading() {
   document.body.insertAdjacentHTML('beforeend', `
     <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
@@ -49,18 +46,16 @@ function showLoading() {
   `);
 }
 
-// تابع حذف لودینگ
 function hideLoading() {
   const loadingOverlay = document.getElementById('loading-overlay');
   if (loadingOverlay) loadingOverlay.remove();
 }
 
-// تابع اصلی جستجوی پیشرفته
 async function advancedSearch() {
   // دریافت مقادیر از فرم
-  const query = document.getElementById('search-query').value.trim().toLowerCase();
-  const withGenres = Array.from(document.getElementById('with-genres').selectedOptions).map(opt => opt.value).join(',');
-  const withoutGenres = Array.from(document.getElementById('without-genres').selectedOptions).map(opt => opt.value).join(',');
+  const contentType = document.querySelector('input[name="content-type"]:checked').value;
+  const withGenres = Array.from(document.querySelectorAll('input[name="with-genres"]:checked')).map(input => input.value).join(',');
+  const withoutGenres = Array.from(document.querySelectorAll('input[name="without-genres"]:checked')).map(input => input.value).join(',');
   const withCountry = document.getElementById('with-country').value;
   const minVote = document.getElementById('min-vote').value;
 
@@ -69,66 +64,52 @@ async function advancedSearch() {
   const movieTitle = document.getElementById('movie-title');
   const tvTitle = document.getElementById('tv-title');
 
-  // نمایش لودینگ
   showLoading();
 
   try {
-    // ساخت URL برای Discover API
-    let movieUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc`;
-    let tvUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc`;
+    // ساخت URLها بر اساس نوع محتوا
+    let movieUrl = contentType !== 'tv' ? `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc` : null;
+    let tvUrl = contentType !== 'movie' ? `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc` : null;
 
     // اعمال فیلترها
-    if (query) {
-      movieUrl += `&with_text_query=${encodeURIComponent(query)}`;
-      tvUrl += `&with_text_query=${encodeURIComponent(query)}`;
-    }
-    if (withGenres) {
-      movieUrl += `&with_genres=${withGenres}`;
-      tvUrl += `&with_genres=${withGenres}`;
-    }
-    if (withoutGenres) {
-      movieUrl += `&without_genres=${withoutGenres}`;
-      tvUrl += `&without_genres=${withoutGenres}`;
-    }
-    if (withCountry) {
-      movieUrl += `&with_origin_country=${withCountry}`;
-      tvUrl += `&with_origin_country=${withCountry}`;
-    }
-    if (minVote) {
-      movieUrl += `&vote_average.gte=${minVote}`;
-      tvUrl += `&vote_average.gte=${minVote}`;
-    }
+    const applyFilters = (url) => {
+      if (withGenres) url += `&with_genres=${withGenres}`;
+      if (withoutGenres) url += `&without_genres=${withoutGenres}`;
+      if (withCountry) url += `&with_origin_country=${withCountry}`;
+      if (minVote) url += `&vote_average.gte=${minVote}`;
+      return url;
+    };
+
+    if (movieUrl) movieUrl = applyFilters(movieUrl);
+    if (tvUrl) tvUrl = applyFilters(tvUrl);
 
     // دریافت داده‌ها
+    const fetchData = async (url) => {
+      if (!url) return { results: [] };
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`خطای سرور: ${res.status}`);
+      return res.json();
+    };
+
     const [movieRes, tvRes] = await Promise.all([
-      fetch(movieUrl).then(res => {
-        if (!res.ok) throw new Error(`خطای سرور (فیلم‌ها): ${res.status}`);
-        return res.json();
-      }),
-      fetch(tvUrl).then(res => {
-        if (!res.ok) throw new Error(`خطای سرور (سریال‌ها): ${res.status}`);
-        return res.json();
-      })
+      fetchData(movieUrl),
+      fetchData(tvUrl)
     ]);
 
     const movies = movieRes.results || [];
     const tvSeries = tvRes.results || [];
 
-    // پاکسازی کانتینرها
     movieResults.innerHTML = '';
     tvResults.innerHTML = '';
-    movieTitle.textContent = `نتایج جستجو فیلم${query ? ` برای "${query}"` : ''}`;
-    tvTitle.textContent = `نتایج جستجو سریال${query ? ` برای "${query}"` : ''}`;
+    movieTitle.textContent = contentType !== 'tv' ? 'نتایج جستجو فیلم' : 'نتایج جستجو فیلم (غیرفعال)';
+    tvTitle.textContent = contentType !== 'movie' ? 'نتایج جستجو سریال' : 'نتایج جستجو سریال (غیرفعال)';
 
     const seenIds = new Set();
 
     // رندر سریال‌ها
-    if (tvSeries.length > 0) {
+    if (tvSeries.length > 0 && contentType !== 'movie') {
       for (const tv of tvSeries) {
-        if (seenIds.has(tv.id)) {
-          console.warn(`سریال تکراری با شناسه ${tv.id} حذف شد`);
-          continue;
-        }
+        if (seenIds.has(tv.id)) continue;
         seenIds.add(tv.id);
 
         let poster = tv.poster_path ? `${baseImageUrl}${tv.poster_path}` : defaultPoster;
@@ -147,17 +128,14 @@ async function advancedSearch() {
           </div>
         `;
       }
-    } else {
+    } else if (contentType !== 'movie') {
       tvResults.innerHTML = '<p class="text-center text-red-500">سریالی یافت نشد!</p>';
     }
 
     // رندر فیلم‌ها
-    if (movies.length > 0) {
+    if (movies.length > 0 && contentType !== 'tv') {
       for (const movie of movies) {
-        if (seenIds.has(movie.id)) {
-          console.warn(`فیلم تکراری با شناسه ${movie.id} حذف شد`);
-          continue;
-        }
+        if (seenIds.has(movie.id)) continue;
         seenIds.add(movie.id);
 
         let poster = movie.poster_path ? `${baseImageUrl}${movie.poster_path}` : defaultPoster;
@@ -176,19 +154,18 @@ async function advancedSearch() {
           </div>
         `;
       }
-    } else {
+    } else if (contentType !== 'tv') {
       movieResults.innerHTML = '<p class="text-center text-red-500">فیلمی یافت نشد!</p>';
     }
   } catch (error) {
     console.error('خطا در جستجوی پیشرفته:', error);
-    movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد! لطفاً دوباره تلاش کنید.</p>';
-    tvResults.innerHTML = '';
+    movieResults.innerHTML = contentType !== 'tv' ? '<p class="text-center text-red-500">خطایی رخ داد!</p>' : '';
+    tvResults.innerHTML = contentType !== 'movie' ? '<p class="text-center text-red-500">خطایی رخ داد!</p>' : '';
   } finally {
     hideLoading();
   }
 }
 
-// رویدادها هنگام بارگذاری صفحه
 document.addEventListener('DOMContentLoaded', async () => {
   await initializeSwitcher();
   const searchButton = document.getElementById('advanced-search-button');
@@ -197,15 +174,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchButton.addEventListener('click', advancedSearch);
   } else {
     console.error('دکمه جستجو پیدا نشد!');
-  }
-
-  // اجازه جستجو با Enter
-  const searchInput = document.getElementById('search-query');
-  if (searchInput) {
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        searchButton.click();
-      }
-    });
   }
 });

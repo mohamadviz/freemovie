@@ -56,8 +56,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico" />
-    <script src="/freemovie/analytics.js"></script>
+    <link rel="icon" href="/freemovie/fav/favicon.ico    <script src="/freemovie/analytics.js"></script>
     <script
       defer
       src="https://cloud.umami.is/script.js"
@@ -117,6 +116,33 @@
         50% { transform: scale(1.1) translateY(-15px); opacity: 1; }
         100% { transform: scale(0.8) translateY(0); opacity: 0.8; }
       }
+      /* استایل‌های فرم جستجو */
+      .search-form {
+        background: #1f2937;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
+      }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        background: #374151;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .checkbox-label:hover {
+        background: #4b5563;
+      }
+      input[type="checkbox"]:checked + span {
+        color: #3b82f6;
+      }
     </style>
   </head>
   <body class="bg-gray-900 text-white min-h-screen flex flex-col">
@@ -141,57 +167,173 @@
 
     <main class="container mx-auto flex-1 py-8">
       <!-- فرم جستجوی پیشرفته -->
-      <div class="flex flex-col gap-4 mb-8 px-4">
-        <input
-          type="text"
-          id="search-query"
-          class="p-3 rounded-lg bg-gray-800 text-white"
-          placeholder="عبارت جستجو (اختیاری)"
-        />
-        <div>
-          <label class="text-white">ژانرهای مورد نظر:</label>
-          <select multiple id="with-genres" class="p-2 bg-gray-800 text-white rounded w-full">
-            <option value="28">اکشن</option>
-            <option value="12">ماجراجویی</option>
-            <option value="16">انیمیشن</option>
-            <option value="35">کمدی</option>
-            <option value="80">جنایی</option>
-            <option value="18">درام</option>
-            <option value="10751">خانوادگی</option>
-            <option value="14">فانتزی</option>
-            <option value="27">ترسناک</option>
-            <option value="10402">موزیکال</option>
-            <option value="9648">رازآلود</option>
-            <option value="10749">عاشقانه</option>
-            <option value="878">علمی-تخیلی</option>
-            <option value="53">هیجان‌انگیز</option>
-            <option value="10752">جنگی</option>
-            <option value="37">وسترن</option>
-          </select>
+      <div class="search-form mx-4">
+        <h2 class="text-xl font-bold mb-4 text-center text-blue-400">جستجوی پیشرفته</h2>
+        
+        <!-- نوع محتوا -->
+        <div class="mb-6">
+          <label class="block text-white mb-2">نوع محتوا:</label>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center">
+              <input type="radio" name="content-type" value="movie" class="mr-2" checked>
+              <span>فقط فیلم</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="content-type" value="tv" class="mr-2">
+              <span>فقط سریال</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="content-type" value="both" class="mr-2">
+              <span>هر دو</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="text-white">ژانرهای ناخواسته:</label>
-          <select multiple id="without-genres" class="p-2 bg-gray-800 text-white rounded w-full">
-            <option value="28">اکشن</option>
-            <option value="12">ماجراجویی</option>
-            <option value="16">انیمیشن</option>
-            <option value="35">کمدی</option>
-            <option value="80">جنایی</option>
-            <option value="18">درام</option>
-            <option value="10751">خانوادگی</option>
-            <option value="14">فانتزی</option>
-            <option value="27">ترسناک</option>
-            <option value="10402">موزیکال</option>
-            <option value="9648">رازآلود</option>
-            <option value="10749">عاشقانه</option>
-            <option value="878">علمی-تخیلی</option>
-            <option value="53">هیجان‌انگیز</option>
-            <option value="10752">جنگی</option>
-            <option value="37">وسترن</option>
-          </select>
+
+        <!-- ژانرهای مورد نظر -->
+        <div class="mb-6">
+          <label class="block text-white mb-2">ژانرهای مورد نظر:</label>
+          <div class="checkbox-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="28" class="hidden">
+              <span>اکشن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="12" class="hidden">
+              <span>ماجراجویی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="16" class="hidden">
+              <span>انیمیشن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="35" class="hidden">
+              <span>کمدی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="80" class="hidden">
+              <span>جنایی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="18" class="hidden">
+              <span>درام</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="10751" class="hidden">
+              <span>خانوادگی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="14" class="hidden">
+              <span>فانتزی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="27" class="hidden">
+              <span>ترسناک</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="10402" class="hidden">
+              <span>موزیکال</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="9648" class="hidden">
+              <span>رازآلود</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="10749" class="hidden">
+              <span>عاشقانه</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="878" class="hidden">
+              <span>علمی-تخیلی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="53" class="hidden">
+              <span>هیجان‌انگیز</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="10752" class="hidden">
+              <span>جنگی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="with-genres" value="37" class="hidden">
+              <span>وسترن</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="text-white">کشور تولید:</label>
+
+        <!-- ژانرهای ناخواسته -->
+        <div class="mb-6">
+          <label class="block text-white mb-2">ژانرهای ناخواسته:</label>
+          <div class="checkbox-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="28" class="hidden">
+              <span>اکشن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="12" class="hidden">
+              <span>ماجراجویی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="16" class="hidden">
+              <span>انیمیشن</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="35" class="hidden">
+              <span>کمدی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="80" class="hidden">
+              <span>جنایی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="18" class="hidden">
+              <span>درام</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="10751" class="hidden">
+              <span>خانوادگی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="14" class="hidden">
+              <span>فانتزی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="27" class="hidden">
+              <span>ترسناک</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="10402" class="hidden">
+              <span>موزیکال</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="9648" class="hidden">
+              <span>رازآلود</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="10749" class="hidden">
+              <span>عاشقانه</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="878" class="hidden">
+              <span>علمی-تخیلی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="53" class="hidden">
+              <span>هیجان‌انگیز</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="10752" class="hidden">
+              <span>جنگی</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="without-genres" value="37" class="hidden">
+              <span>وسترن</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- کشور تولید -->
+        <div class="mb-6">
+          <label class="block text-white mb-2">کشور تولید:</label>
           <select id="with-country" class="p-2 bg-gray-800 text-white rounded w-full">
             <option value="">همه</option>
             <option value="US">آمریکا</option>
@@ -203,8 +345,10 @@
             <option value="IN">هند</option>
           </select>
         </div>
-        <div>
-          <label class="text-white">حداقل امتیاز:</label>
+
+        <!-- حداقل امتیاز -->
+        <div class="mb-6">
+          <label class="block text-white mb-2">حداقل امتیاز:</label>
           <input
             type="number"
             id="min-vote"
@@ -215,9 +359,11 @@
             placeholder="مثلاً 7"
           />
         </div>
+
+        <!-- دکمه جستجو -->
         <button
           id="advanced-search-button"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 w-full sm:w-auto"
         >
           <i class="fas fa-search"></i> جستجو
         </button>
