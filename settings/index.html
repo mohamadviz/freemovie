@@ -1,230 +1,65 @@
 <!DOCTYPE html>
 <html lang="fa" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>فیری مووی - جستجو</title>
-
-    <meta
-      name="description"
-      content="فیری مووی - اطلاعات جدیدترین فیلم‌ها و سریال‌های پرطرفدار را ببینید و از لینک‌های دانلود الماس مووی استفاده کنید."
-    />
-    <meta
-      name="keywords"
-      content="فیری مووی, دانلود فیلم, سریال پرطرفدار, اطلاعات فیلم, الماس مووی"
-    />
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="تیم فیری مووی" />
-    <link
-      rel="canonical"
-      href="https://m4tinbeigi-official.github.io/freemovie/"
-    />
-    <meta property="og:title" content="فیری مووی - جستجو" />
-    <meta
-      property="og:description"
-      content="جستجوی فیلم‌ها و سریال‌ها در فیری مووی با اطلاعات کامل و لینک دانلود."
-    />
-    <meta
-      property="og:image"
-      content="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-    />
-    <meta
-      property="og:url"
-      content="https://m4tinbeigi-official.github.io/freemovie/search/"
-    />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="فیری مووی - جستجو" />
-    <meta
-      name="twitter:description"
-      content="جستجوی فیلم‌ها و سریال‌ها با لینک دانلود از الماس مووی."
-    />
-    <meta
-      name="twitter:image"
-      content="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-    />
-
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico" />
-    <script src="/freemovie/analytics.js"></script>
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="7978c39a-bec9-49d3-976a-8362dc9dfea2"
-    ></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات - فیری مووی</title>
+    <meta name="description" content="تنظیمات فیری مووی - توکن‌های OMDB و TMDb خود را وارد کنید.">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico">
     <style>
-      body {
-        font-family: "Vazir", sans-serif;
-        direction: rtl;
-      }
-      .skeleton {
-        background: #333;
-        animation: pulse 1.5s infinite;
-        height: 16rem;
-        border-radius: 0.5rem;
-      }
-      @keyframes pulse {
-        0% {
-          opacity: 0.5;
-        }
-        50% {
-          opacity: 1;
-        }
-        100% {
-          opacity: 0.5;
-        }
-      }
-      .search-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 2rem;
-      }
-      .search-column {
-        flex: 1;
-      }
-      .grid-container {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
-      }
-      @media (min-width: 768px) {
-        .grid-container {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-      }
-      @media (max-width: 640px) {
-        .search-container {
-          flex-direction: column;
-        }
-      }
-      /* انیمیشن کلی جعبه */
-      .popcorn {
-        animation: bounce 1s infinite ease-in-out;
-      }
-
-      /* انیمیشن پاپ‌کورن‌های بیرون‌زده */
-      .popcorn-piece {
-        transform-origin: center;
-      }
-
-      /* انیمیشن پرش جعبه */
-      @keyframes bounce {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-      }
-
-      /* انیمیشن پاپ شدن دونه‌های پاپ‌کورن */
-      @keyframes pop {
-        0% {
-          transform: scale(0.8) translateY(0);
-          opacity: 0.8;
-        }
-        50% {
-          transform: scale(1.1) translateY(-15px);
-          opacity: 1;
-        }
-        100% {
-          transform: scale(0.8) translateY(0);
-          opacity: 0.8;
-        }
-      }
+        body { font-family: 'Vazir', sans-serif; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; padding: 2rem; }
     </style>
-  </head>
-  <body class="bg-gray-900 text-white min-h-screen flex flex-col">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
     <header class="bg-gray-800 p-4 shadow-md">
-      <div class="container mx-auto flex flex-row justify-between items-center">
-        <!-- Navigation -->
-        <nav class="flex items-center space-x-4">
-          <a href="/freemovie" class="hover:text-gray-300 p-4"
-            ><i class="fas fa-home"></i
-          ></a>
-          <a href="/freemovie/watchlist/index.html" class="hover:text-gray-300"
-            ><i class="fas fa-bookmark"></i
-          ></a>
-          <a href="/freemovie/search/index.html" class="hover:text-gray-300"
-            ><i class="fas fa-search"></i
-          ></a>
-          <button id="theme-toggle" class="hover:text-gray-300">
-            <i class="fas fa-sun"></i>
-          </button>
-        </nav>
-        <!-- Logo -->
-        <div>
-          <a href="https://m4tinbeigi-official.github.io/freemovie/">
-            <img
-              src="https://m4tinbeigi-official.github.io/freemovie/logo.png"
-              alt="لوگو"
-              class="h-10"
-            />
-          </a>
+        <div class="container mx-auto flex justify-between items-center">
+            <nav class="flex items-center space-x-4">
+                <a href="/freemovie" class="hover:text-gray-300 p-4" aria-label="خانه"><i class="fas fa-home"></i></a>
+                <a href="/freemovie/settings/index.html" class="hover:text-gray-300" aria-label="تنظیمات"><i class="fas fa-cog"></i></a>
+            </nav>
+            <div>
+                <a href="/freemovie">
+                    <img src="https://m4tinbeigi-official.github.io/freemovie/logo.png" alt="لوگوی فیری مووی" class="h-10">
+                </a>
+            </div>
         </div>
-      </div>
     </header>
 
-    <main class="container mx-auto flex-1 py-8">
-      <div class="flex justify-center mb-8 items-center gap-2 sm:gap-4">
-        <input
-          type="text"
-          id="search"
-          class="w-full max-w-lg p-3 rounded-lg bg-gray-800 text-white"
-          placeholder="فیلم یا سریالی که دنبالشی رو اینجا به فارسی یا انگلیسی بنویس ..."
-        />
-        <button
-          id="search-button"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          <i class="fas fa-search"></i> جستجو
-        </button>
-      </div>
-      <div class="search-container m-12">
-        <section class="search-column">
-          <h2
-            id="movie-title"
-            class="text-sm sm:text-lg md:text-xl xl:text-2xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-1"
-          >
-            نتایج جستجو فیلم
-          </h2>
-          <div id="movie-results" class="grid-container">
-            <!-- Skeleton placeholders -->
-            <div></div>
-            <div></div>
-          </div>
-        </section>
-        <section class="search-column">
-          <h2
-            id="tv-title"
-            class="text-sm sm:text-lg md:text-xl xl:text-2xl font-bold mb-4 text-center bg-blue-500 w-full rounded-lg p-1"
-          >
-            نتایج جستجو سریال
-          </h2>
-          <div id="tv-results" class="grid-container">
-            <!-- Initially empty -->
-          </div>
-        </section>
-      </div>
+    <main class="container mx-auto py-8 flex-grow">
+        <h1 class="text-2xl font-bold mb-6 text-center">تنظیمات</h1>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">تنظیم توکن‌های API</h2>
+            <p class="text-gray-300 mb-4">
+                با وارد کردن توکن OMDB از 
+                <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" class="underline hover:text-gray-200">OMDB API</a> 
+                تا ۹۰٪ سرعت سایت رو بیشتر کنید! کافیه ثبت‌نام کنید، ایمیل رو تأیید کنید و توکن رو اینجا بذارید. 
+                توکن TMDb از 
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" class="underline hover:text-gray-200">TMDb API</a> 
+                اختیاریه و نیازی بهش نیست، ولی اگه خواستید می‌تونید اضافه کنید.
+            </p>
+            <div class="mb-4">
+                <label for="omdb-token" class="block text-gray-200 mb-2">توکن OMDB:</label>
+                <input type="text" id="omdb-token" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="توکن OMDB خود را وارد کنید">
+            </div>
+            <div class="mb-4">
+                <label for="tmdb-token" class="block text-gray-200 mb-2">توکن TMDb (اختیاری):</label>
+                <input type="text" id="tmdb-token" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="توکن TMDb خود را وارد کنید">
+            </div>
+            <button id="save-tokens" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ذخیره توکن‌ها</button>
+            <button id="clear-tokens" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2">حذف توکن‌ها</button>
+            <p id="status-message" class="mt-4 text-sm"></p>
+        </div>
     </main>
+
     <footer class="bg-gray-800 p-4 mt-auto">
-      <div class="container mx-auto text-center">
-        <p>فیری مووی - دانلود رایگان فیلم و سریال</p>
-      </div>
+        <div class="container mx-auto text-center">
+            <p>فیری مووی - ساخته شده با 🤍</p>
+        </div>
     </footer>
-    <script src="../apiKeySwitcher.js"></script>
-    <script src="./settings.js"></script>
-  </body>
+<script src="settings.js" defer></script>
+</body>
 </html>
