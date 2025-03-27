@@ -5,6 +5,9 @@ const baseImageUrl = 'https://image.tmdb.org/t/p/w500';
 const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png';
 
 let apiKeySwitcher;
+let currentPage = 1;
+let totalPages = 1; 
+let searchParams = {};
 
 async function initializeSwitcher() {
   apiKeySwitcher = await loadApiKeys();
@@ -51,20 +54,29 @@ function hideLoading() {
   if (loadingOverlay) loadingOverlay.remove();
 }
 
-async function advancedSearch() {
+async function advancedSearch(page = 1, append = false) {
   const withGenres = Array.from(document.querySelectorAll('input[name="with-genres"]:checked')).map(input => input.value).join(',');
   const withoutGenres = Array.from(document.querySelectorAll('input[name="without-genres"]:checked')).map(input => input.value).join(',');
   const withCountries = Array.from(document.querySelectorAll('input[name="with-countries"]:checked')).map(input => input.value);
   const withoutCountries = Array.from(document.querySelectorAll('input[name="without-countries"]:checked')).map(input => input.value);
   const minVote = document.getElementById('min-vote').value;
 
+  // ذخیره پارامترهای جستجو برای استفاده در بارگذاری صفحات بعدی
+  searchParams = { withGenres, withoutGenres, withCountries, withoutCountries, minVote };
+
   const movieResults = document.getElementById('movie-results');
   const movieTitle = document.getElementById('movie-title');
+  const loadMoreButton = document.getElementById('load-more-button');
+
+  if (!append) {
+    currentPage = 1; // ریست کردن صفحه به 1 در جستجوی جدید
+    movieResults.innerHTML = ''; // پاک کردن نتایج قبلی
+  }
 
   showLoading();
 
   try {
-    let movieUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc`;
+    let movieUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=${language}&sort_by=vote_average.desc&page=${page}`;
 
     if (withGenres) movieUrl += `&with_genres=${withGenres}`;
     if (withoutGenres) movieUrl += `&without_genres=${withoutGenres}`;
@@ -75,6 +87,8 @@ async function advancedSearch() {
     if (!res.ok) throw new Error(`خطای سرور: ${res.status}`);
     const movieRes = await res.json();
 
+    totalPages = movieRes.total_pages || 1; // به‌روزرسانی تعداد کل صفحات
+
     const filterCountries = (items, excludedCountries) => {
       return items.filter(item => {
         const countries = item.origin_country || [];
@@ -84,8 +98,9 @@ async function advancedSearch() {
 
     const movies = filterCountries(movieRes.results || [], withoutCountries);
 
-    movieResults.innerHTML = '';
-    movieTitle.textContent = 'نتایج جستجو فیلم';
+    if (!append) {
+      movieTitle.textContent = 'نتایج جستجو فیلم';
+    }
 
     const seenIds = new Set();
 
@@ -110,24 +125,47 @@ async function advancedSearch() {
           </div>
         `;
       }
-    } else {
+
+      // نمایش یا مخفی کردن دکمه "مشاهده بیشتر"
+      if (currentPage < totalPages) {
+        loadMoreButton.classList.remove('hidden');
+      } else {
+        loadMoreButton.classList.add('hidden');
+      }
+    } else if (!append) {
       movieResults.innerHTML = '<p class="text-center text-red-500">فیلمی یافت نشد!</p>';
+      loadMoreButton.classList.add('hidden');
     }
   } catch (error) {
     console.error('خطا در جستجوی پیشرفته:', error);
-    movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد!</p>';
+    if (!append) {
+      movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد!</p>';
+    }
+    loadMoreButton.classList.add('hidden');
   } finally {
     hideLoading();
   }
 }
 
+function loadMore() {
+  currentPage++;
+  advancedSearch(currentPage, true); // بارگذاری صفحه بعدی و اضافه کردن به نتایج فعلی
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await initializeSwitcher();
   const searchButton = document.getElementById('advanced-search-button');
+  const loadMoreButton = document.getElementById('load-more-button');
 
   if (searchButton) {
-    searchButton.addEventListener('click', advancedSearch);
+    searchButton.addEventListener('click', () => advancedSearch(1, false));
   } else {
     console.error('دکمه جستجو پیدا نشد!');
+  }
+
+  if (loadMoreButton) {
+    loadMoreButton.addEventListener('click', loadMore);
+  } else {
+    console.error('دکمه مشاهده بیشتر پیدا نشد!');
   }
 });
