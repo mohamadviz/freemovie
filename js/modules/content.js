@@ -78,4 +78,3 @@ function createCard(item, poster, type) {
         </div>
     `;
 }
-}
