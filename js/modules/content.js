@@ -1,6 +1,5 @@
 import { apiUrls, defaultPoster, getCachedImage } from './api.js';
-import { startLoadingBar, updateLoadingBar, finishLoadingBar } from './ui.js';
-
+import { startLoadingBar, finishLoadingBar } from './ui.js';
 export async function fetchAndDisplayContent(apiKeySwitcher) {
     const movieContainer = document.getElementById('new-movies');
     const tvContainer = document.getElementById('trending-tv');

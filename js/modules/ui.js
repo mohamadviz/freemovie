@@ -6,6 +6,13 @@ export function startLoadingBar() {
     }
 }
 
+export function updateLoadingBar(percentage) {
+    const loadingBar = document.getElementById('loading-bar');
+    if (loadingBar) {
+        loadingBar.style.width = percentage + '%';
+    }
+}
+
 export function finishLoadingBar() {
     const loadingBar = document.getElementById('loading-bar');
     if (loadingBar) {
