@@ -373,6 +373,30 @@ function manageThemeToggle() {
     }
 }
 
+function manageAvailabilityNotice() {
+    const notice = document.getElementById('availability-notice');
+    const closeButton = document.getElementById('close-availability');
+
+    if (!notice) {
+        console.warn('عنصر availability-notice یافت نشد');
+        return;
+    }
+
+    if (!localStorage.getItem('availabilityNoticeClosed')) {
+        notice.classList.remove('hidden');
+    } else {
+        notice.classList.add('hidden');
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            notice.classList.add('hidden');
+            localStorage.setItem('availabilityNoticeClosed', 'true');
+            console.log('اطلاعیه بسته شد');
+        });
+    }
+}
+
 // اجرای توابع پس از بارگذاری صفحه
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('صفحه بارگذاری شد');

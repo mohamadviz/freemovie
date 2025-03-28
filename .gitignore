@@ -2,3 +2,4 @@
 .vscode
 movies-list.txt
 node_modules
+/.idea
