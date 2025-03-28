@@ -331,20 +331,25 @@ function manageFabButton() {
     const fab = document.getElementById('fab');
     const fabOptions = document.getElementById('fabOptions');
 
-    if (!fab || !fabOptions) {
-        console.warn('عناصر fab یا fabOptions یافت نشدند');
+    if (!fab) {
+        console.error('عنصر fab یافت نشد');
+        return;
+    }
+    if (!fabOptions) {
+        console.error('عنصر fabOptions یافت نشد');
         return;
     }
 
     fab.addEventListener('click', function(event) {
         event.stopPropagation();
+        console.log('دکمه FAB کلیک شد، وضعیت فعلی hidden:', fabOptions.classList.contains('hidden'));
         fabOptions.classList.toggle('hidden');
-        console.log('دکمه FAB کلیک شد');
     });
 
     document.addEventListener('click', function(event) {
         if (!fab.contains(event.target) && !fabOptions.contains(event.target)) {
             fabOptions.classList.add('hidden');
+            console.log('کلیک خارج از FAB، منو بسته شد');
         }
     });
 }
