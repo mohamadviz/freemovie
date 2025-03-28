@@ -20,7 +20,7 @@
     <meta name="twitter:image" content="https://m4tinbeigi-official.github.io/freemovie/logo.png" />
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/gh/rAastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="icon" href="/freemovie/fav/favicon.ico" type="favicon/ico" />
     <style>
@@ -30,20 +30,28 @@
             background-color: #1f2937;
             color: #ffffff;
         }
-        .search-box {
-            width: 100%;
-            max-width: 600px;
-            padding: 1.5rem;
-            font-size: 1.25rem;
-            border-radius: 0.75rem;
+        .digit-box {
+            width: 3rem;
+            height: 4rem;
+            text-align: center;
+            font-size: 1.5rem;
+            border-radius: 0.5rem;
             background-color: #374151;
             color: #ffffff;
             border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 0.25rem;
         }
-        .search-box:focus {
+        .digit-box:focus {
             outline: none;
             box-shadow: 0 0 0 3px #3b82f6;
+        }
+        .digit-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            max-width: 600px;
         }
         .result-grid {
             display: grid;
@@ -59,9 +67,10 @@
             text-align: center;
         }
         @media (max-width: 640px) {
-            .search-box {
-                padding: 1rem;
-                font-size: 1rem;
+            .digit-box {
+                width: 2.5rem;
+                height: 3.5rem;
+                font-size: 1.25rem;
             }
             .result-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -85,11 +94,20 @@
 
     <main class="container mx-auto flex-1 py-8 flex flex-col items-center">
         <h1 class="text-2xl md:text-3xl font-bold mb-6">جستجو با کد فیلم یا سریال</h1>
-        <input type="text" id="search-id" class="search-box" placeholder="کد فیلم یا سریال را وارد کنید (مثال: 123)" />
+        <div class="digit-container" id="digit-container">
+            <input type="text" maxlength="1" class="digit-box" data-index="0" />
+            <input type="text" maxlength="1" class="digit-box" data-index="1" />
+            <input type="text" maxlength="1" class="digit-box" data-index="2" />
+            <input type="text" maxlength="1" class="digit-box" data-index="3" />
+            <input type="text" maxlength="1" class="digit-box" data-index="4" />
+            <input type="text" maxlength="1" class="digit-box" data-index="5" />
+            <input type="text" maxlength="1" class="digit-box" data-index="6" />
+            <input type="text" maxlength="1" class="digit-box" data-index="7" />
+        </div>
         <div id="results" class="result-grid w-full max-w-5xl"></div>
         <div class="info-section w-full max-w-2xl">
             <p class="text-lg">
-                ما در صفحه اینستاگرام <a href="https://instagram.com/freemovie_ir" target="_blank" class="text-blue-400 hover:underline">@freemovie_ir</a> کد اختصاصی هر فیلم و سریال را زیر پست‌ها قرار می‌دهیم. کافیست کد را از آنجا بردارید و در این صفحه وارد کنید تا اطلاعات کامل و لینک دانلود را ببینید!
+                در صفحه اینستاگرام ما <a href="https://instagram.com/freemovie_ir" target="_blank" class="text-blue-400 hover:underline">@freemovie_ir</a>، زیر هر پست کد اختصاصی فیلم یا سریال را می‌بینید. کد را اینجا وارد کنید تا اطلاعات کامل و لینک دانلود را دریافت کنید!
             </p>
         </div>
     </main>

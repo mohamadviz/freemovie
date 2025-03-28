@@ -77,14 +77,30 @@ async function searchById(id) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeSwitcher();
-    const searchInput = document.getElementById('search-id');
+    const digitInputs = document.querySelectorAll('.digit-box');
 
-    searchInput.addEventListener('input', (e) => {
-        const id = e.target.value.trim();
-        if (id.length >= 3) {
-            searchById(id);
-        } else {
-            document.getElementById('results').innerHTML = '';
-        }
+    digitInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (/^\d$/.test(value)) { // فقط اعداد مجازند
+                if (index < 7 && value) { // انتقال به کادر بعدی (تا کادر ۷)
+                    digitInputs[index + 1].focus();
+                }
+                const id = Array.from(digitInputs).map(input => input.value).join('').trim();
+                if (id.length >= 3) {
+                    searchById(id);
+                } else {
+                    document.getElementById('results').innerHTML = '';
+                }
+            } else {
+                e.target.value = ''; // حذف ورودی غیرعددی
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && index > 0) {
+                digitInputs[index - 1].focus();
+            }
+        });
     });
 });
