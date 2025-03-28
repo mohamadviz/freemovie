@@ -5,7 +5,7 @@ const changelogData = [
         version: "1.3.0",
         date: "1404/01/07",
         changes: [
-            { feature: "اضافه شدن نوار پیشرفت بارگذاری", contributor: "متین بیگی" },
+            { feature: "اضافه شدن نوار پیشرفت بارگذاری", contributor: "ریک سانچز" },
             { feature: "بهبود کش تصاویر برای سرعت بیشتر", contributor: "علی رضایی" },
             { feature: "رفع باگ نمایش فیلم‌های تکراری", contributor: "سارا محمدی" }
         ]
@@ -14,16 +14,16 @@ const changelogData = [
         version: "1.2.0",
         date: "1403/12/15",
         changes: [
-            { feature: "اضافه شدن پاپ‌آپ حمایت", contributor: "متین بیگی" },
-            { feature: "پشتیبانی از تم روشن", contributor: "نیما حسینی" }
+            { feature: "اضافه شدن پاپ‌آپ حمایت", contributor: "ریک سانچز" },
+            { feature: "پشتیبانی از تم روشن", contributor: "ارمین جوان" }
         ]
     },
     {
         version: "1.1.0",
         date: "1403/11/01",
         changes: [
-            { feature: "اضافه شدن بخش جستجو", contributor: "رضا احمدی" },
-            { feature: "بهینه‌سازی رابط کاربری", contributor: "متین بیگی" }
+            { feature: "اضافه شدن بخش جستجو", contributor: "ارمین جوان" },
+            { feature: "بهینه‌سازی رابط کاربری", contributor: "ریک سانچز" }
         ]
     }
 ];
