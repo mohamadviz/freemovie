@@ -75,12 +75,23 @@ async function searchById(id) {
     }
 }
 
+function convertPersianToEnglishNumbers(input) {
+    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    return input.split('').map(char => {
+        const index = persianNumbers.indexOf(char);
+        return index !== -1 ? englishNumbers[index] : char;
+    }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeSwitcher();
     const searchInput = document.getElementById('search-id');
 
     searchInput.addEventListener('input', (e) => {
-        const id = e.target.value.trim();
+        let id = e.target.value.trim();
+        id = convertPersianToEnglishNumbers(id); // تبدیل اعداد فارسی به انگلیسی
         if (id.length >= 3) {
             searchById(id);
         } else {
