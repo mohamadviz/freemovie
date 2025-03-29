@@ -64,7 +64,6 @@ const addNewApiKeyInput = (value = '') => {
         <button class="remove-api-key-btn bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition duration-300">-</button>
     `;
     elements.apiKeyList.appendChild(newApiKeyInput);
-
     newApiKeyInput.querySelector('.remove-api-key-btn').addEventListener('click', () => {
         elements.apiKeyList.removeChild(newApiKeyInput);
         updateApiKeys();
@@ -161,11 +160,10 @@ const insertCreditBlocks = blocks => {
             const nextStart = timeToSeconds(blocks[i + 1].startTime);
             const gap = nextStart - currentEnd;
 
-            if (gap > 4) { // اگر فاصله بیشتر از ۴ ثانیه باشد
+            if (gap > 4) {
                 const gapThird = gap / 3;
-                const creditStart = currentEnd + gapThird; // شروع بخش دوم (وسط)
-                const creditEnd = creditStart + gapThird;  // پایان بخش دوم
-
+                const creditStart = currentEnd + gapThird;
+                const creditEnd = creditStart + gapThird;
                 newBlocks.push({
                     index: (nextIndex++).toString(),
                     startTime: secondsToTime(creditStart),
@@ -233,7 +231,7 @@ const renderSubtitles = (container, blocks, isEditable = false) => {
 
 // Translation Logic
 const getBlockContext = index => {
-    const count = parseInt(elements.contextCountInput.value) || 1;
+    const count = parseInt(elements.contextCountInput.value) || 3;
     let contextArray = [];
 
     for (let i = Math.max(0, index - count); i < index; i++) {
@@ -252,12 +250,79 @@ const getBlockContext = index => {
     return JSON.stringify(contextArray);
 };
 
+// تشخیص زبان با استفاده از franc
+const detectLanguage = text => {
+    try {
+        return franc(text, { minLength: 3 }) || 'und'; // 'und' اگر نامشخص باشد
+    } catch (e) {
+        return 'und';
+    }
+};
+
+// تنظیم طول ترجمه بر اساس زمان نمایش
+const adjustTranslationLength = (translatedText, startTime, endTime) => {
+    const duration = timeToSeconds(endTime) - timeToSeconds(startTime);
+    const maxCharsPerSecond = 15; // حداکثر 15 کاراکتر در ثانیه برای خوانایی
+    const maxLength = Math.floor(duration * maxCharsPerSecond);
+
+    if (translatedText.length > maxLength) {
+        const words = translatedText.split(' ');
+        let result = '';
+        for (let word of words) {
+            if ((result + word).length <= maxLength) {
+                result += (result ? ' ' : '') + word;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+    return translatedText;
+};
+
+// پس‌پردازش ترجمه
+const postProcessTranslation = (translatedText, originalText, startTime, endTime) => {
+    let result = translatedText.trim();
+
+    // تنظیم طول بر اساس زمان نمایش
+    result = adjustTranslationLength(result, startTime, endTime);
+
+    // حذف تکرارها و فاصله‌های اضافی
+    result = result.replace(/\s+/g, ' ').trim();
+
+    return result;
+};
+
 const translateSubtitle = async (text, model, blockIndex) => {
-    // اگر متن مربوط به فیری مووی باشد، نیازی به ترجمه نیست
     if (text === "ترجمه شده توسط هوش مصنوعی فیری مووی") return text;
 
     const context = getBlockContext(blockIndex);
-    const promptWithContext = elements.customPrompt.value.replace('{{CONTEXT}}', context);
+    const sourceLang = detectLanguage(text);
+    const improvedPrompt = `
+You are an expert cinematic subtitle translator. Translate ONLY the "current" subtitle (index: 0) from "${sourceLang === 'und' ? 'any language' : sourceLang}" to Persian.
+
+CRITICAL INSTRUCTIONS:
+- The JSON array in {{CONTEXT}} provides surrounding subtitles for context:
+  - Index -1 or lower = "previous" subtitles
+  - Index 0 = "current" subtitle (THE ONLY ONE YOU TRANSLATE)
+  - Index 1 or higher = "next" subtitles
+- Translate with 100% fidelity to the original meaning, preserving tone (e.g., casual, formal, humorous) and intent.
+- Use natural, conversational Persian that flows smoothly for viewers.
+- Do NOT add or omit words unless explicitly inappropriate (e.g., extreme profanity, explicit content, hate speech), then replace ONLY that part with ***.
+- Keep the translation concise, matching the brevity of subtitles.
+
+STRICT RULES:
+1. Respond ONLY with the Persian translation of the "current" subtitle.
+2. Do NOT include text from "previous" or "next" subtitles.
+3. Do NOT add explanations or extra formatting.
+
+Example:
+- Input: "I love you" (index: 0)
+- Output: "دوستت دارم"
+
+{{CONTEXT}}
+    `.replace('{{CONTEXT}}', context);
+
     let allKeysLimited = false;
 
     while (true) {
@@ -281,7 +346,7 @@ const translateSubtitle = async (text, model, blockIndex) => {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptWithContext }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: improvedPrompt }] }] })
             });
 
             if (!response.ok) {
@@ -301,12 +366,15 @@ const translateSubtitle = async (text, model, blockIndex) => {
                 continue;
             }
 
-            const translatedText = data.candidates[0].content.parts[0].text.trim();
+            let translatedText = data.candidates[0].content.parts[0].text.trim();
             if (!translatedText) {
                 state.currentApiKeyIndex++;
                 if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
                 continue;
             }
+
+            // اعمال پس‌پردازش با زمان‌بندی
+            translatedText = postProcessTranslation(translatedText, text, state.subtitleBlocks[blockIndex].startTime, state.subtitleBlocks[blockIndex].endTime);
             return translatedText;
         } catch (error) {
             console.error(`Error with API key ${state.currentApiKeyIndex + 1}:`, error);
@@ -314,6 +382,47 @@ const translateSubtitle = async (text, model, blockIndex) => {
             if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
             continue;
         }
+    }
+};
+
+// ذخیره در گوگل درایو
+const uploadToGoogleDrive = async (content, fileName) => {
+    // توجه: این کد نیاز به تنظیم Google Drive API و OAuth 2.0 دارد
+    const accessToken = 'YOUR_GOOGLE_DRIVE_ACCESS_TOKEN'; // باید از طریق OAuth دریافت شود
+    const boundary = '-------314159265358979323846';
+    const delimiter = `\r\n--${boundary}\r\n`;
+    const closeDelimiter = `\r\n--${boundary}--`;
+
+    const metadata = {
+        name: fileName,
+        mimeType: 'text/plain'
+    };
+
+    const multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: text/plain\r\n\r\n' +
+        content +
+        closeDelimiter;
+
+    try {
+        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': `multipart/related; boundary="${boundary}"`
+            },
+            body: multipartRequestBody
+        });
+
+        if (!response.ok) throw new Error('Failed to upload to Google Drive');
+        const data = await response.json();
+        showFlashMessage(`File uploaded to Google Drive with ID: ${data.id}`, 'success');
+    } catch (error) {
+        console.error('Google Drive upload error:', error);
+        showFlashMessage('Failed to upload to Google Drive: ' + error.message, 'error');
     }
 };
 
@@ -472,6 +581,15 @@ elements.translateButton.addEventListener('click', async () => {
             const success = await translateBlock(state.subtitleBlocks[i], model, i, totalBlocks);
             if (!success && state.isTranslating) i--;
         }
+        if (state.lastTranslatedIndex === totalBlocks - 1) {
+            const content = state.translatedBlocks
+                .filter(block => block)
+                .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
+                .join('\n\n');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileName = `translated_subtitle_${timestamp}.srt`;
+            await uploadToGoogleDrive(content, fileName);
+        }
     } finally {
         if (!state.isTranslating) {
             elements.translateButton.textContent = 'Translate';
@@ -507,6 +625,15 @@ elements.continueButton.addEventListener('click', async () => {
                 const success = await translateBlock(state.subtitleBlocks[i], model, i, totalBlocks);
                 if (!success && state.isTranslating) i--;
             }
+            if (state.lastTranslatedIndex === totalBlocks - 1) {
+                const content = state.translatedBlocks
+                    .filter(block => block)
+                    .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
+                    .join('\n\n');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const fileName = `translated_subtitle_${timestamp}.srt`;
+                await uploadToGoogleDrive(content, fileName);
+            }
         } finally {
             if (!state.isTranslating) {
                 elements.translateButton.textContent = 'Translate';
@@ -540,7 +667,7 @@ elements.editToggle.addEventListener('click', () => {
     elements.editToggle.textContent = state.isEditMode ? 'Save Edits' : 'Edit Translations';
 });
 
-elements.saveButton.addEventListener('click', () => {
+elements.saveButton.addEventListener('click', async () => {
     try {
         if (state.translatedBlocks.length === 0) throw new Error('No translated subtitles to save');
         const content = state.translatedBlocks
@@ -552,15 +679,18 @@ elements.saveButton.addEventListener('click', () => {
         const a = document.createElement('a');
         a.href = url;
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        a.download = `translated_subtitle_${timestamp}.srt`;
+        const fileName = `translated_subtitle_${timestamp}.srt`;
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
+
+        // آپلود به گوگل درایو
+        await uploadToGoogleDrive(content, fileName);
+
         showFlashMessage('Translated subtitles saved successfully!');
     } catch (error) {
         console.error('Error saving subtitles:', error);
-        showFlashMessage('Error
-
- saving subtitles: ' + error.message, 'error');
+        showFlashMessage('Error saving subtitles: ' + error.message, 'error');
     }
 });
 
