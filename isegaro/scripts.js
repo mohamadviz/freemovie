@@ -71,7 +71,7 @@ const addNewApiKeyInput = (value = '') => {
 };
 
 const updateApiKeys = () => {
-    state.apiKeys = Array.from(document.querySelectorAll('.api-key-input'))
+    stateahan.apiKeys = Array.from(document.querySelectorAll('.api-key-input'))
         .map(input => input.value.trim())
         .filter(key => key !== '');
     localStorage.setItem('translatorApiKeys', JSON.stringify(state.apiKeys));
@@ -553,7 +553,7 @@ elements.translateButton.addEventListener('click', async () => {
                 .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                 .join('\n\n');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
+            const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
             await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
         }
     } finally {
@@ -597,7 +597,7 @@ elements.continueButton.addEventListener('click', async () => {
                     .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                     .join('\n\n');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
+                const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
                 await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
             }
         } finally {
@@ -645,7 +645,7 @@ elements.saveButton.addEventListener('click', async () => {
         const a = document.createElement('a');
         a.href = url;
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
+        const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
         a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
