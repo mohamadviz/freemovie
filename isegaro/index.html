@@ -1,123 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subtitle Translator by iSegaro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background-color: #eee;
-            border-radius: 2px;
-            margin: 10px 0;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: #4CAF50;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .editor-toolbar {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-
-        .editor-toolbar button {
-            padding: 2px 8px;
-            font-size: 12px;
-        }
-
-        [contenteditable="true"]:focus {
-            outline: 2px solid #4CAF50;
-            border-radius: 4px;
-        }
-
-        .flash-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 5px;
-            color: white;
-            animation: fadeInOut 3s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-20px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-20px); }
-        }
-    </style>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background-color: #eee;
-            border-radius: 2px;
-            margin: 10px 0;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: #4CAF50;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .editor-toolbar {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-
-        .editor-toolbar button {
-            padding: 2px 8px;
-            font-size: 12px;
-        }
-
-        [contenteditable="true"]:focus {
-            outline: 2px solid #4CAF50;
-            border-radius: 4px;
-        }
-
-        .flash-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 5px;
-            color: white;
-            animation: fadeInOut 3s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-20px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-20px); }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
-        <!-- Header -->
         <h1 class="text-4xl font-bold text-center mb-6 text-blue-600">Subtitle Translator</h1>
 
-        <!-- API Key and Model Selection Section -->
         <div class="mb-8 space-y-4">
             <div id="apiKeySection">
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">API Keys Management</h3>
                 <div id="apiKeyList">
                     <div class="flex items-center space-x-2">
-                        <input type="text" placeholder="Enter your first API Key" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm api-key-input">
+                        <input type="text" placeholder="Enter your first API Key" class="api-key-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <button class="add-api-key-btn bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition duration-300">+</button>
                     </div>
                 </div>
@@ -131,8 +31,7 @@
                     <option value="gemini-2.0-flash-lite-preview-02-05">Gemini 2.0 Flash-Lite Preview</option>
                 </select>
             </div>
-            
-            <!-- Advanced Options Section -->
+
             <div class="mt-4">
                 <button id="advancedOptionsToggle" class="w-full flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 transition-colors py-2">
                     <span class="text-sm font-medium">Advanced Options</span>
@@ -141,17 +40,14 @@
                     </svg>
                 </button>
                 <div id="advancedOptionsContent" class="hidden space-y-4 mt-4">
-                    <!-- Move existing options here -->
                     <div>
                         <label for="waitTimeInput" class="block text-sm font-medium text-gray-700">Wait time when API keys are limited (seconds):</label>
                         <input type="number" id="waitTimeInput" min="5" max="300" value="60" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-                    
                     <div>
                         <label for="contextCountInput" class="block text-sm font-medium text-gray-700">Context blocks count (subtitles before/after):</label>
                         <input type="number" id="contextCountInput" min="1" max="5" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Translation Settings</h3>
                         <textarea id="customPrompt" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3" placeholder="Custom translation prompt...">
@@ -181,7 +77,6 @@ TRANSLATION QUALITY REQUIREMENTS:
 - Preserve all elements of the original text
 - Flow smoothly so viewers can instantly understand it
 
-
 The "previous" and "next" subtitles exist ONLY for your reference to understand context.
 
 YOUR RESPONSE MUST BE EXACTLY ONE THING: The Persian translation of ONLY the "current" subtitle text.
@@ -190,12 +85,11 @@ Example:
 If "current" subtitle (index: 0) contains ONLY "I love you" - your ENTIRE output must be ONLY "دوستت دارم"
 
 Any response that contains extra words or content from adjacent subtitles is INCORRECT and will be rejected.
-</textarea>
+                        </textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Progress Bar -->
             <div id="progressContainer" class="hidden mb-4">
                 <div class="flex justify-between mb-1">
                     <span class="text-sm text-gray-600">Translation Progress:</span>
@@ -207,7 +101,6 @@ Any response that contains extra words or content from adjacent subtitles is INC
             </div>
         </div>
 
-        <!-- File Upload Section -->
         <div class="flex flex-col items-center mb-8">
             <input type="file" id="subtitleFile" accept=".srt" class="hidden" />
             <label for="subtitleFile" class="bg-blue-500 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-600 transition duration-300">
@@ -216,43 +109,28 @@ Any response that contains extra words or content from adjacent subtitles is INC
             <p id="fileName" class="mt-2 text-sm text-gray-500 italic hidden"></p>
         </div>
 
-        <!-- Subtitle Display Sections -->
         <div id="subtitleSections" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
-            <!-- Original Subtitles Section -->
             <div>
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">Original Subtitles</h2>
-                <div id="originalSubtitleContainer" class="space-y-6 h-[400px] overflow-y-auto border border-gray-200 rounded-lg p-4 w-full md:w-[450px]">
-                </div>
+                <div id="originalSubtitleContainer" class="space-y-6 h-[400px] overflow-y-auto border border-gray-200 rounded-lg p-4 w-full md:w-[450px]"></div>
             </div>
-
-            <!-- Translated Subtitles Section -->
             <div>
                 <h2 class="text-xl font-semibold mb-4 text-gray-700 flex justify-between items-center">
                     <span>Translated Subtitles</span>
-                    <button id="editToggle" class="text-sm bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 hidden">
-                        Toggle Edit Mode
-                    </button>
+                    <button id="editToggle" class="text-sm bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 hidden">Toggle Edit Mode</button>
                 </h2>
-                <div id="translatedSubtitleContainer" class="space-y-6 h-[400px] overflow-y-auto border border-gray-200 rounded-lg p-4 w-full md:w-[450px]">
-                </div>
+                <div id="translatedSubtitleContainer" class="space-y-6 h-[400px] overflow-y-auto border border-gray-200 rounded-lg p-4 w-full md:w-[450px]"></div>
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div id="actionButtons" class="flex justify-between mt-8 hidden">
             <div class="flex gap-4">
-                <button id="translateButton" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300">
-                    Translate
-                </button>
-                <button id="continueButton" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 hidden">
-                    Continue from last point
-                </button>
+                <button id="translateButton" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300">Translate</button>
+                <button id="continueButton" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 hidden">Continue from last point</button>
             </div>
-            <button id="saveButton" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300" disabled>
-                Save Translated Subtitles
-            </button>
+            <button id="saveButton" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300" disabled>Save Translated Subtitles</button>
         </div>
-        <!-- Copyright and Donate Section -->
+
         <div class="flex flex-col md:flex-row justify-between items-center text-sm mt-8 pt-4 border-t border-gray-200 gap-4">
             <div class="text-gray-500 flex items-center gap-2">
                 <span>&copy; 2025 Subtitle Translator v0.1 by iSegaro.</span>
@@ -271,765 +149,17 @@ Any response that contains extra words or content from adjacent subtitles is INC
             </div>
             <div class="flex items-center gap-4">
                 <span class="text-gray-500">Support this project:</span>
-                <div class="flex gap-2">
-                    <button onclick="copyWallet()" class="inline-flex items-center gap-2 bg-[#26A17B] text-white px-4 py-2 rounded-lg hover:bg-[#1f8463] transition duration-300">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0C5.375 0 0 5.375 0 12C0 18.625 5.375 24 12 24C18.625 24 24 18.625 24 12C24 5.375 18.625 0 12 0ZM12.25 15.875V17.75H9.75V15.875C7.625 15.5 6 14.125 6 12.5C6 10.875 7.625 9.5 9.75 9.125V4.25H12.25V9.125C14.375 9.5 16 10.875 16 12.5C16 14.125 14.375 15.5 12.25 15.875ZM12.25 13.375C13.125 13.25 13.75 12.875 13.75 12.5C13.75 12.125 13.125 11.75 12.25 11.625V13.375ZM9.75 11.625C8.875 11.75 8.25 12.125 8.25 12.5C8.25 12.875 8.875 13.25 9.75 13.375V11.625Z"/>
-                        </svg>
-                        USDT (TRC20)
-                    </button>
-                </div>
+                <button onclick="copyWallet()" class="inline-flex items-center gap-2 bg-[#26A17B] text-white px-4 py-2 rounded-lg hover:bg-[#1f8463] transition duration-300">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.375 0 0 5.375 0 12C0 18.625 5.375 24 12 24C18.625 24 24 18.625 24 12C24 5.375 18.625 0 12 0ZM12.25 15.875V17.75H9.75V15.875C7.625 15.5 6 14.125 6 12.5C6 10.875 7.625 9.5 9.75 9.125V4.25H12.25V9.125C14.375 9.5 16 10.875 16 12.5C16 14.125 14.375 15.5 12.25 15.875ZM12.25 13.375C13.125 13.25 13.75 12.875 13.75 12.5C13.75 12.125 13.125 11.75 12.25 11.625V13.375ZM9.75 11.625C8.875 11.75 8.25 12.125 8.25 12.5C8.25 12.875 8.875 13.25 9.75 13.375V11.625Z"/>
+                    </svg>
+                    USDT (TRC20)
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Flash Message Container -->
     <div id="flashMessageContainer"></div>
-</div>
-
-<!-- JavaScript -->
-<script>
-    // Elements
-    const fileInput = document.getElementById('subtitleFile');
-    const fileNameDisplay = document.getElementById('fileName');
-    const subtitleSections = document.getElementById('subtitleSections');
-    const actionButtons = document.getElementById('actionButtons');
-    const originalSubtitleContainer = document.getElementById('originalSubtitleContainer');
-    const translatedSubtitleContainer = document.getElementById('translatedSubtitleContainer');
-    const translateButton = document.getElementById('translateButton');
-    const continueButton = document.getElementById('continueButton');
-    const saveButton = document.getElementById('saveButton');
-    const apiKeySection = document.getElementById('apiKeySection');
-    const apiKeyList = document.getElementById('apiKeyList');
-    const modelSelector = document.getElementById('modelSelector');
-    const waitTimeInput = document.getElementById('waitTimeInput');
-    const contextCountInput = document.getElementById('contextCountInput');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBarFill = document.getElementById('progressBarFill');
-    const progressText = document.getElementById('progressText');
-    const editToggle = document.getElementById('editToggle');
-    const customPrompt = document.getElementById('customPrompt');
-	let savedCustomPrompt = localStorage.getItem('translatorCustomPrompt') || '';
-
-    // State variables
-    let subtitleBlocks = [];
-    let translatedBlocks = [];
-    let apiKeys = [];
-    let currentApiKeyIndex = 0;
-    let isTranslating = false;
-    let isEditMode = false;
-    let lastTranslatedIndex = -1;
-    let lastApiCallTimes = {};
-    let savedApiKeys = JSON.parse(localStorage.getItem('translatorApiKeys')) || [];
-
-    // Advanced Options Toggle
-    document.getElementById('advancedOptionsToggle').addEventListener('click', () => {
-        const content = document.getElementById('advancedOptionsContent');
-        const icon = document.getElementById('toggleIcon');
-        content.classList.toggle('hidden');
-        icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-    });
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        if (savedApiKeys.length > 0) {
-            savedApiKeys.forEach((key, index) => {
-                if (index === 0) {
-                    document.querySelector('.api-key-input').value = key;
-                } else {
-                    addNewApiKeyInput(key);
-                }
-            });
-        }
-        
-        // بازیابی پرامپت ذخیره‌شده
-        if (savedCustomPrompt) {
-            customPrompt.value = savedCustomPrompt;
-        }
-        
-        // بازیابی زمان انتظار ذخیره‌شده
-        const savedWaitTime = localStorage.getItem('translatorWaitTime');
-        if (savedWaitTime) {
-            waitTimeInput.value = savedWaitTime;
-        }
-        
-        // بازیابی تعداد بلوک‌های زمینه
-        const savedContextCount = localStorage.getItem('translatorContextCount');
-        if (savedContextCount) {
-            contextCountInput.value = savedContextCount;
-        }
-        
-        loadProgress();
-        
-        // افزودن event listener برای ذخیره پرامپت هنگام تغییر
-        customPrompt.addEventListener('input', () => {
-            localStorage.setItem('translatorCustomPrompt', customPrompt.value);
-        });
-        
-        // افزودن event listener برای ذخیره زمان انتظار
-        waitTimeInput.addEventListener('input', () => {
-            localStorage.setItem('translatorWaitTime', waitTimeInput.value);
-        });
-        
-        // افزودن event listener برای ذخیره تعداد بلوک‌های زمینه
-        contextCountInput.addEventListener('input', () => {
-            localStorage.setItem('translatorContextCount', contextCountInput.value);
-        });
-    });
-    function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    function copyWallet() {
-        const wallet = "TQKZ2nMjsDiEZjfKR9Dkh5Ka5byjUs8b8U";
-        navigator.clipboard.writeText(wallet);
-        showFlashMessage('USDT Wallet address copied to clipboard!', 'success');
-    }
-
-    function showFlashMessage(message, type = 'success') {
-        const flashMessage = document.createElement('div');
-        flashMessage.className = `flash-message ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
-        flashMessage.textContent = message;
-        document.getElementById('flashMessageContainer').appendChild(flashMessage);
-        setTimeout(() => flashMessage.remove(), 3000);
-    }
-
-    function addNewApiKeyInput(value = '') {
-        const newApiKeyInput = document.createElement('div');
-        newApiKeyInput.className = 'flex items-center space-x-2 mt-2';
-        newApiKeyInput.innerHTML = `
-            <input type="text" value="${value}" placeholder="Enter another API Key" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm api-key-input">
-            <button class="remove-api-key-btn bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition duration-300">-</button>
-        `;
-        apiKeyList.appendChild(newApiKeyInput);
-
-        newApiKeyInput.querySelector('.remove-api-key-btn').addEventListener('click', () => {
-            apiKeyList.removeChild(newApiKeyInput);
-            updateApiKeys();
-        });
-    }
-
-    // Progress Management
-    function saveProgress() {
-        const progress = {
-            lastTranslatedIndex,
-            translatedBlocks,
-            subtitleBlocks,
-            fileName: fileNameDisplay.textContent
-        };
-        localStorage.setItem('translationProgress', JSON.stringify(progress));
-    }
-
-    function loadProgress() {
-        const savedProgress = localStorage.getItem('translationProgress');
-        if (savedProgress) {
-            const progress = JSON.parse(savedProgress);
-            if (progress.fileName === fileNameDisplay.textContent) {
-                lastTranslatedIndex = progress.lastTranslatedIndex;
-                translatedBlocks = progress.translatedBlocks;
-                subtitleBlocks = progress.subtitleBlocks;
-                renderSubtitles(translatedSubtitleContainer, translatedBlocks, isEditMode);
-                if (lastTranslatedIndex < subtitleBlocks.length - 1) {
-                    continueButton.classList.remove('hidden');
-                }
-                saveButton.disabled = false;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // API Key Management
-    apiKeyList.addEventListener('click', (event) => {
-        if (event.target.classList.contains('add-api-key-btn')) {
-            addNewApiKeyInput();
-        }
-    });
-
-    function updateApiKeys() {
-        apiKeys = Array.from(document.querySelectorAll('.api-key-input'))
-            .map(input => input.value.trim())
-            .filter(key => key !== '');
-        localStorage.setItem('translatorApiKeys', JSON.stringify(apiKeys));
-    }
-
-    // File Handling
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            clearSubtitles();
-            fileNameDisplay.textContent = file.name;
-            fileNameDisplay.classList.remove('hidden');
-            subtitleSections.classList.remove('hidden');
-            actionButtons.classList.remove('hidden');
-            editToggle.classList.remove('hidden');
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result;
-                subtitleBlocks = parseSRT(content);
-                renderSubtitles(originalSubtitleContainer, subtitleBlocks, false);
-                if (!loadProgress()) {
-                    saveButton.disabled = true;
-                    continueButton.classList.add('hidden');
-                }
-            };
-            reader.readAsText(file);
-        }
-    });
-    function parseSRT(content) {
-        return content.split('\n\n')
-            .filter(block => block.trim())
-            .map(block => {
-                const lines = block.trim().split('\n');
-                const index = lines[0];
-                const timing = lines[1];
-                const text = lines.slice(2).join('\n');
-                const [startTime, endTime] = timing.split(' --> ');
-                return { index, startTime, endTime, text };
-            });
-    }
-    function parseSRT(content) {
-        // تمیز کردن محتوا از کاراکترهای خاص
-        content = content.replace(/\r/g, '');
-        
-        // جدا کردن بلاک‌ها با الگوی دقیق‌تر
-        const blocks = content.split(/\n\n+/)
-            .filter(block => block.trim())
-            .map(block => {
-                try {
-                    const lines = block.trim().split(/\n/);
-                    
-                    // بررسی اعتبار شماره زیرنویس
-                    const index = lines[0].trim();
-                    if (!index.match(/^\d+$/)) {
-                        console.warn(`Invalid subtitle index: ${index}`);
-                        return null;
-                    }
-    
-                    // بررسی اعتبار زمان‌بندی
-                    const timing = lines[1];
-                    if (!timing || !timing.includes('-->')) {
-                        console.warn(`Invalid timing format in subtitle ${index}`);
-                        return null;
-                    }
-    
-                    // جدا کردن متن زیرنویس
-                    const text = lines.slice(2).join('\n').trim();
-                    if (!text) {
-                        console.warn(`Empty text in subtitle ${index}`);
-                        return null;
-                    }
-    
-                    const [startTime, endTime] = timing.split('-->').map(t => t.trim());
-                    return { index, startTime, endTime, text };
-                } catch (error) {
-                    console.error('Error parsing block:', block);
-                    return null;
-                }
-            })
-            .filter(block => block !== null);
-    
-        if (blocks.length === 0) {
-            throw new Error('No valid subtitles found in the file');
-        }
-    
-        return blocks;
-    }
-    // Subtitle Rendering
-    function renderSubtitles(container, blocks, isEditable = false) {
-    container.innerHTML = '';
-    const isTranslatedContainer = container === translatedSubtitleContainer;
-    
-    blocks.forEach((block, index) => {
-        const isTranslated = index <= lastTranslatedIndex;
-        const subtitleBlock = document.createElement('div');
-        subtitleBlock.className = 'flex space-x-4 subtitle-block';
-        
-        // اضافه کردن دکمه بازترجمه فقط برای بخش ترجمه شده
-        const retranslateButton = isTranslated && isTranslatedContainer ? 
-            `<button class="retranslate-btn text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" data-index="${index}">
-                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </button>` : '';
-
-        // اعمال استایل راست به چپ برای متون فارسی در بخش ترجمه‌ها
-        const rtlStyle = isTranslatedContainer ? 'dir="rtl" style="text-align:right; font-family:\'Vazirmatn\', sans-serif;"' : '';
-        
-        const textContent = isEditable ? 
-            `<div class="bg-gray-200 text-gray-800 p-3 rounded-lg text-sm ${isTranslated ? 'bg-green-50' : ''}" contenteditable="true" spellcheck="false" ${rtlStyle}>${escapeHtml(block.text)}</div>` :
-            `<div class="bg-gray-200 text-gray-800 p-3 rounded-lg text-sm ${isTranslated ? 'bg-green-50' : ''}" ${rtlStyle}>${escapeHtml(block.text)}</div>`;
-
-        subtitleBlock.innerHTML = `
-            <div class="w-10 h-10 flex items-center justify-center ${isTranslated ? 'bg-green-200' : 'bg-gray-200'} text-gray-600 font-bold text-center rounded-full text-xs">${block.index}</div>
-            <div class="flex-grow space-y-2">
-                <div class="flex justify-between items-center">
-                    <div class="flex space-x-2">
-                        <div class="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">${block.startTime}</div>
-                        <span class="text-gray-500 font-medium text-xs">→</span>
-                        <div class="bg-red-100 text-red-700 font-medium px-3 py-1 rounded-full text-xs">${block.endTime}</div>
-                    </div>
-                    ${retranslateButton}
-                </div>
-                ${textContent}
-            </div>
-        `;
-        container.appendChild(subtitleBlock);
-    });
-
-    // اضافه کردن event listener برای دکمه‌های بازترجمه
-    container.querySelectorAll('.retranslate-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const index = parseInt(e.currentTarget.dataset.index);
-            await retranslateBlock(index);
-        });
-    });
-}
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-	// Function to get context from surrounding blocks
-	function getBlockContext(index) {
-		const count = parseInt(contextCountInput.value) || 1;
-		let contextArray = [];
-		
-		// Add previous blocks
-		for (let i = Math.max(0, index - count); i < index; i++) {
-			if (subtitleBlocks[i]) {
-				contextArray.push({
-					position: "previous",
-					index: i - index,  // نسبت به بلوک فعلی (منفی)
-					text: subtitleBlocks[i].text
-				});
-			}
-		}
-		
-		// Add current block
-		if (subtitleBlocks[index]) {
-			contextArray.push({
-				position: "current",
-				index: 0,
-				text: subtitleBlocks[index].text
-			});
-		}
-		
-		// Add next blocks
-		for (let i = index + 1; i < Math.min(subtitleBlocks.length, index + count + 1); i++) {
-			if (subtitleBlocks[i]) {
-				contextArray.push({
-					position: "next",
-					index: i - index,  // نسبت به بلوک فعلی (مثبت)
-					text: subtitleBlocks[i].text
-				});
-			}
-		}
-		
-		return JSON.stringify(contextArray);
-	}   
-
-	// Translation
-    async function translateSubtitle(text, model, blockIndex) {
-	const prompt = text;
-    const context = getBlockContext(blockIndex);
-    const promptWithContext = customPrompt.value.replace('{{CONTEXT}}', context);
-    
-    // Since the current block is already in the context, we don't need to add it again
-    // We just use the promptWithContext as is
-    let allKeysLimited = false;
-
-    while (true) {
-        if (!isTranslating) {
-            throw new Error('Translation stopped by user.');
-        }
-
-        if (currentApiKeyIndex >= apiKeys.length) {
-                if (allKeysLimited) {
-                    const waitTime = parseInt(waitTimeInput.value) || 60; // استفاده از مقدار تنظیم شده
-                    showFlashMessage(`All API keys are rate limited. Waiting ${waitTime} seconds...`);
-                    await delay(waitTime * 1000);
-                    currentApiKeyIndex = 0;
-                    allKeysLimited = false;
-                    lastApiCallTimes = {};
-                    showFlashMessage('Resuming translation...', 'success');
-                    return await translateSubtitle(text, model, blockIndex);
-                }
-                currentApiKeyIndex = 0;
-            }
-
-        const apiKey = apiKeys[currentApiKeyIndex];
-
-        try {
-            //console.log('Final Prompt:', promptWithContext );
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: promptWithContext }] }]
-                })
-            });
-
-            if (!response.ok) {
-                if (response.status === 429) {
-                    lastApiCallTimes[apiKey] = Date.now();
-                    currentApiKeyIndex++;
-                    if (currentApiKeyIndex >= apiKeys.length) {
-                        allKeysLimited = true;
-                    }
-                    continue;
-                }
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            // بررسی اعتبار پاسخ
-            if (!data || !data.candidates || !data.candidates[0] || 
-                !data.candidates[0].content || !data.candidates[0].content.parts || 
-                !data.candidates[0].content.parts[0] || 
-                typeof data.candidates[0].content.parts[0].text !== 'string') {
-                
-                console.error('Invalid API response:', data);
-                
-                // اگر پاسخ نامعتبر است، API key را تغییر می‌دهیم
-                currentApiKeyIndex++;
-                if (currentApiKeyIndex >= apiKeys.length) {
-                    allKeysLimited = true;
-                }
-                continue;
-            }
-
-            const translatedText = data.candidates[0].content.parts[0].text.trim();
-            
-            // اگر متن ترجمه خالی باشد، دوباره تلاش می‌کنیم
-            if (!translatedText) {
-                currentApiKeyIndex++;
-                if (currentApiKeyIndex >= apiKeys.length) {
-                    allKeysLimited = true;
-                }
-                continue;
-            }
-
-            return translatedText;
-
-        } catch (error) {
-            console.error(`Error with API key ${currentApiKeyIndex + 1}:`, error);
-            
-            if (error.message.includes('API Error') || error.message.includes('rate limit')) {
-                currentApiKeyIndex++;
-                if (currentApiKeyIndex >= apiKeys.length) {
-                    allKeysLimited = true;
-                }
-                continue;
-            }
-            
-            // برای خطاهای دیگر، API key را تغییر می‌دهیم
-            currentApiKeyIndex++;
-            if (currentApiKeyIndex >= apiKeys.length) {
-                allKeysLimited = true;
-            }
-            continue;
-        }
-    }
-}
-
-
-	async function retranslateBlock(index) {
-    if (!apiKeys.length) {
-        showFlashMessage('Please enter API Key first', 'error');
-        return;
-    }
-
-    const block = subtitleBlocks[index];
-    const model = modelSelector.value;
-    const btn = document.querySelector(`.retranslate-btn[data-index="${index}"]`);
-    
-    // تغییر ظاهر دکمه در حین ترجمه
-    btn.disabled = true;
-    btn.innerHTML = '<span class="animate-spin">↻</span>';
-
-    try {
-        // فعال کردن وضعیت ترجمه
-        const previousTranslatingState = isTranslating;
-        isTranslating = true;
-
-        // دریافت متن اطراف (شامل بلاک فعلی)
-        const context = getBlockContext(index);
-        
-        // استفاده از دستورالعمل با بافت که شامل بلاک فعلی است
-        const specialPrompt = customPrompt.value.replace('{{CONTEXT}}', context);
-
-        const translatedText = await translateSubtitle(block.text, model, index);
-        translatedBlocks[index] = { ...block, text: translatedText };
-        
-        renderSubtitles(translatedSubtitleContainer, translatedBlocks, isEditMode);
-        showFlashMessage('Block retranslated successfully!', 'success');
-        saveProgress();
-
-        // برگرداندن وضعیت ترجمه به حالت قبلی
-        isTranslating = previousTranslatingState;
-    } catch (error) {
-        showFlashMessage('Failed to retranslate block: ' + error.message, 'error');
-    } finally {
-        // برگرداندن دکمه به حالت عادی
-        btn.disabled = false;
-        btn.innerHTML = `
-            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-        `;
-    }
-}
-
-
-
-    async function translateBlock(block, model, index, totalBlocks) {
-    let retryCount = 0;
-    const maxRetries = 3; // حداکثر تعداد تلاش برای هر بلوک
-
-    while (retryCount < maxRetries) {
-        try {
-            const translatedText = await translateSubtitle(block.text, model, index);
-            
-            // بررسی اعتبار متن ترجمه شده
-            if (!translatedText || translatedText.trim().length === 0) {
-                throw new Error('Empty translation received');
-            }
-
-            const translatedBlock = { ...block, text: translatedText };
-            translatedBlocks[index] = translatedBlock;
-            lastTranslatedIndex = index;
-
-            renderSubtitles(translatedSubtitleContainer, translatedBlocks, isEditMode);
-            saveButton.disabled = false;
-            saveProgress();
-
-            const progress = Math.round(((index + 1) / totalBlocks) * 100);
-            progressBarFill.style.width = `${progress}%`;
-            progressText.textContent = `${progress}%`;
-
-            const lastSubtitle = translatedSubtitleContainer.lastElementChild;
-            if (lastSubtitle) {
-                lastSubtitle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-
-            return true;
-
-        } catch (error) {
-            if (error.message === 'Translation stopped by user.') {
-                throw error;
-            }
-
-            retryCount++;
-            console.error(`Translation attempt ${retryCount} failed for subtitle ${block.index}:`, error.message);
-            
-            if (retryCount === maxRetries) {
-                showFlashMessage(`Failed to translate subtitle ${block.index} after ${maxRetries} attempts. Skipping...`, 'error');
-                return false;
-            }
-
-            // انتظار کوتاه قبل از تلاش مجدد
-            await delay(2000);
-        }
-    }
-
-    return false;
-}
-
-    // Translation Process
-    translateButton.addEventListener('click', async () => {
-        if (!subtitleBlocks.length) {
-            showFlashMessage('Please upload a subtitle file first.', 'error');
-            return;
-        }
-
-        if (isTranslating) {
-            isTranslating = false;
-            translateButton.textContent = 'Translate';
-            progressContainer.classList.add('hidden');
-            if (translatedBlocks.length > 0) {
-                saveButton.disabled = false;
-                continueButton.classList.remove('hidden');
-                showFlashMessage('Translation stopped. You can continue later or save partial translations.');
-            }
-            return;
-        }
-
-        updateApiKeys();
-        if (apiKeys.length === 0) {
-            showFlashMessage('Please enter at least one valid API Key.', 'error');
-            return;
-        }
-
-        const model = modelSelector.value;
-        isTranslating = true;
-        translateButton.textContent = 'Stop';
-        progressContainer.classList.remove('hidden');
-        progressBarFill.style.width = '0%';
-        progressText.textContent = '0%';
-
-        lastTranslatedIndex = -1;
-        translatedBlocks = new Array(subtitleBlocks.length);
-        continueButton.classList.add('hidden');
-
-        const totalBlocks = subtitleBlocks.length;
-
-        try {
-            for (let i = 0; i < totalBlocks && isTranslating; i++) {
-                const success = await translateBlock(subtitleBlocks[i], model, i, totalBlocks);
-                if (!success && isTranslating) {
-                    i--; // Try the same block again
-                    continue;
-                }
-            }
-        } finally {
-            if (!isTranslating) {
-                translateButton.textContent = 'Translate';
-                if (lastTranslatedIndex >= 0) {
-                    continueButton.classList.remove('hidden');
-                }
-            } else {
-                isTranslating = false;
-                translateButton.textContent = 'Translate';
-                if (lastTranslatedIndex === totalBlocks - 1) {
-                    showFlashMessage('Translation completed successfully!');
-                }
-            }
-
-            setTimeout(() => {
-                progressContainer.classList.add('hidden');
-            }, 2000);
-        }
-    });
-
-    // Continue translation
-    continueButton.addEventListener('click', async () => {
-        if (!isTranslating && lastTranslatedIndex < subtitleBlocks.length - 1) {
-            updateApiKeys();
-            if (apiKeys.length === 0) {
-                showFlashMessage('Please enter at least one valid API Key.', 'error');
-                return;
-            }
-
-            const model = modelSelector.value;
-            isTranslating = true;
-            translateButton.textContent = 'Stop';
-            continueButton.classList.add('hidden');
-            progressContainer.classList.remove('hidden');
-
-            const startIndex = lastTranslatedIndex + 1;
-            const totalBlocks = subtitleBlocks.length;
-
-            const progress = Math.round((startIndex / totalBlocks) * 100);
-            progressBarFill.style.width = `${progress}%`;
-            progressText.textContent = `${progress}%`;
-
-            try {
-                for (let i = startIndex; i < totalBlocks && isTranslating; i++) {
-                    const success = await translateBlock(subtitleBlocks[i], model, i, totalBlocks);
-                    if (!success && isTranslating) {
-                        i--; // Try the same block again
-                        continue;
-                    }
-                }
-            } finally {
-                if (!isTranslating) {
-                    translateButton.textContent = 'Translate';
-                    if (lastTranslatedIndex >= 0) {
-                        continueButton.classList.remove('hidden');
-                    }
-                } else {
-                    isTranslating = false;
-                    translateButton.textContent = 'Translate';
-                    if (lastTranslatedIndex === totalBlocks - 1) {
-                        showFlashMessage('Translation completed successfully!');
-                    } else {
-                        continueButton.classList.remove('hidden');
-                        showFlashMessage('Translation paused. Click Continue to resume.');
-                    }
-                }
-
-                setTimeout(() => {
-                    progressContainer.classList.add('hidden');
-                }, 2000);
-            }
-        }
-    });
-
-    // Edit mode toggle
-editToggle.addEventListener('click', () => {
-    if (isEditMode) {
-        // Save changes before turning off edit mode
-        const editableBlocks = translatedSubtitleContainer.querySelectorAll('.subtitle-block');
-        editableBlocks.forEach((block, index) => {
-            const textDiv = block.querySelector('[contenteditable="true"]');
-            if (textDiv && translatedBlocks[index]) {
-                translatedBlocks[index].text = textDiv.innerText.trim();
-            }
-        });
-        saveProgress(); // Save to localStorage
-    }
-    
-    isEditMode = !isEditMode;
-    renderSubtitles(translatedSubtitleContainer, translatedBlocks, isEditMode);
-    editToggle.textContent = isEditMode ? 'Save Edits' : 'Edit Translations';
-});
-
-
-    // Save translations
-    saveButton.addEventListener('click', () => {
-        try {
-            if (translatedBlocks.length === 0) {
-                throw new Error('No translated subtitles to save');
-            }
-
-            const content = translatedBlocks
-                .filter(block => block !== null && block !== undefined)
-                .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
-                .join('\n\n');
-
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            a.download = `translated_subtitle_${timestamp}.srt`;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showFlashMessage('Translated subtitles saved successfully!');
-        } catch (error) {
-            console.error('Error saving subtitles:', error);
-            showFlashMessage('Error saving subtitles: ' + error.message, 'error');
-        }
-    });
-
-    // Sync scroll
-    originalSubtitleContainer.addEventListener('scroll', () => {
-        translatedSubtitleContainer.scrollTop = originalSubtitleContainer.scrollTop;
-    });
-
-    translatedSubtitleContainer.addEventListener('scroll', () => {
-        originalSubtitleContainer.scrollTop = translatedSubtitleContainer.scrollTop;
-    });
-
-    function clearSubtitles() {
-        originalSubtitleContainer.innerHTML = '';
-        translatedSubtitleContainer.innerHTML = '';
-        subtitleBlocks = [];
-        translatedBlocks = [];
-        lastTranslatedIndex = -1;
-        saveButton.disabled = true;
-        continueButton.classList.add('hidden');
-        localStorage.removeItem('translationProgress');
-    }
-
-    // Auto-save progress every 5 seconds
-    setInterval(saveProgress, 5000);
-</script>
+    <script src="scripts.js" defer></script>
 </body>
 </html>
