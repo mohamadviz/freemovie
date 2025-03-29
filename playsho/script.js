@@ -1,4 +1,3 @@
-// متغیرهای اصلی
 let video, connectionStatus;
 let peerConnection, dataChannel;
 let isHost = false;
@@ -6,7 +5,6 @@ let sessionId = null;
 let videoUrl = null;
 let isSyncing = false;
 
-// مقداردهی اولیه هنگام بارگذاری صفحه
 window.onload = function () {
     video = document.getElementById('videoPlayer');
     connectionStatus = document.getElementById('connectionStatus');
@@ -34,17 +32,11 @@ window.onload = function () {
     }
 };
 
-// نمایش و مخفی کردن بخش‌ها
 function showSection(sectionId) {
     ['inputSection', 'shareSection', 'videoSection'].forEach(id => {
         const section = document.getElementById(id);
-        if (id === sectionId) {
-            section.classList.remove('hidden');
-            section.classList.add('show');
-        } else {
-            section.classList.add('hidden');
-            section.classList.remove('show');
-        }
+        section.classList.toggle('hidden', id !== sectionId);
+        section.classList.toggle('show', id === sectionId);
     });
 }
 
@@ -52,7 +44,6 @@ function showInputSection() { showSection('inputSection'); }
 function showVideoSection() { showSection('videoSection'); }
 function showShareSection() { showSection('shareSection'); }
 
-// بارگذاری ویدیو
 function loadVideo(callback) {
     const linkInput = document.getElementById('videoLink');
     videoUrl = videoUrl || linkInput.value.trim();
@@ -87,17 +78,15 @@ function loadVideo(callback) {
     };
 }
 
-// اعتبارسنجی URL
 function isValidUrl(url) {
     try {
         new URL(url);
-        return url.match(/\.(mp4|webm|ogg)$/i);
+        return url.match(/\.(mp4|webm|ogg|m3u8)(\?.*)?$/i);
     } catch (_) {
         return false;
     }
 }
 
-// ایجاد جلسه جدید
 function createNewSession() {
     sessionId = generateSessionId();
     localStorage.setItem(`session_${sessionId}_videoUrl`, videoUrl);
@@ -105,7 +94,6 @@ function createNewSession() {
     showShareSection();
 }
 
-// تنظیم بخش اشتراک‌گذاری
 function setupShareSection() {
     const shareLink = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}`;
     document.getElementById('shareLink').value = shareLink;
@@ -115,7 +103,6 @@ function setupShareSection() {
     document.getElementById('telegramShare').href = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
 }
 
-// کپی لینک
 function copyShareLink() {
     const shareLink = document.getElementById('shareLink');
     shareLink.select();
@@ -123,35 +110,36 @@ function copyShareLink() {
     showStatus('لینک کپی شد!', 'green');
 }
 
-// تنظیم رویدادهای ویدیو
 function setupVideoEventListeners() {
     const events = ['play', 'pause', 'seeked', 'ended'];
     events.forEach(event => {
         video.addEventListener(event, () => {
             if (!isSyncing && dataChannel?.readyState === 'open') {
+                isSyncing = true;
                 const syncData = {
                     type: event,
                     time: video.currentTime,
+                    timestamp: Date.now(),
                     isPlaying: !video.paused && event !== 'ended'
                 };
                 sendSyncData(syncData);
+                setTimeout(() => { isSyncing = false; }, 100);
             }
         });
     });
 
-    // بررسی دوره‌ای برای سینک بهتر
-    setInterval(() => {
-        if (isHost && dataChannel?.readyState === 'open' && !isSyncing) {
+    video.addEventListener('timeupdate', () => {
+        if (!isSyncing && dataChannel?.readyState === 'open' && isHost) {
             sendSyncData({
                 type: 'sync',
                 time: video.currentTime,
+                timestamp: Date.now(),
                 isPlaying: !video.paused
             });
         }
-    }, 1000); // هر 1 ثانیه برای سینک بهتر
+    });
 }
 
-// تنظیم اتصال میزبان
 function setupHostConnection(joinId, offerData) {
     isHost = true;
     sessionId = joinId;
@@ -160,7 +148,6 @@ function setupHostConnection(joinId, offerData) {
     peerConnection.setLocalDescription(desc);
 }
 
-// تنظیم اتصال مهمان
 function setupGuestConnection(joinId) {
     isHost = false;
     sessionId = joinId;
@@ -168,7 +155,6 @@ function setupGuestConnection(joinId) {
     startGuestConnection();
 }
 
-// شروع اتصال مهمان
 function startGuestConnection() {
     peerConnection.createOffer()
         .then(offer => peerConnection.setLocalDescription(offer))
@@ -182,7 +168,6 @@ function startGuestConnection() {
         });
 }
 
-// مدیریت پاسخ مهمان
 function handleAnswer(answerData) {
     try {
         const answer = JSON.parse(decodeURIComponent(answerData));
@@ -198,13 +183,17 @@ function handleAnswer(answerData) {
     }
 }
 
-// تنظیم اتصال Peer
 function setupPeerConnection() {
     peerConnection = new RTCPeerConnection({
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
+            { urls: 'stun:stun2.l.google.com:19302' },
+            {
+                urls: 'turn:your-turn-server.com:3478',
+                username: 'username',
+                credential: 'password'
+            }
         ]
     });
 
@@ -234,7 +223,6 @@ function setupPeerConnection() {
     };
 }
 
-// تنظیم کانال داده
 function setupDataChannel() {
     dataChannel.onopen = () => {
         showStatus('اتصال برقرار شد! ویدیوها هماهنگ هستند.', 'green');
@@ -242,6 +230,7 @@ function setupDataChannel() {
             sendSyncData({
                 type: 'sync',
                 time: video.currentTime,
+                timestamp: Date.now(),
                 isPlaying: !video.paused
             });
         }
@@ -252,8 +241,11 @@ function setupDataChannel() {
             const data = JSON.parse(event.data);
             isSyncing = true;
 
-            const timeDiff = Math.abs(video.currentTime - data.time);
-            if (timeDiff > 0.2) video.currentTime = data.time; // فقط اگر اختلاف بیش از 0.2 ثانیه باشد
+            const latency = (Date.now() - data.timestamp) / 1000;
+            const adjustedTime = data.time + latency;
+
+            const timeDiff = Math.abs(video.currentTime - adjustedTime);
+            if (timeDiff > 0.2) video.currentTime = adjustedTime;
 
             switch (data.type) {
                 case 'play':
@@ -263,16 +255,14 @@ function setupDataChannel() {
                     video.pause();
                     break;
                 case 'seeked':
-                    if (data.isPlaying) video.play().catch(e => console.log('خطا در پخش:', e));
-                    else video.pause();
+                    data.isPlaying ? video.play() : video.pause();
                     break;
                 case 'ended':
                     video.pause();
                     video.currentTime = 0;
                     break;
                 case 'sync':
-                    if (data.isPlaying && video.paused) video.play().catch(e => console.log('خطا در پخش:', e));
-                    else if (!data.isPlaying && !video.paused) video.pause();
+                    data.isPlaying ? video.play() : video.pause();
                     break;
             }
             setTimeout(() => { isSyncing = false; }, 100);
@@ -288,9 +278,8 @@ function setupDataChannel() {
     };
 }
 
-// ارسال داده همگام‌سازی
 function sendSyncData(data) {
-    if (dataChannel && dataChannel.readyState === 'open') {
+    if (dataChannel?.readyState === 'open') {
         try {
             dataChannel.send(JSON.stringify(data));
         } catch (err) {
@@ -299,17 +288,14 @@ function sendSyncData(data) {
     }
 }
 
-// نمایش وضعیت
 function showStatus(message, color) {
     connectionStatus.textContent = message;
     connectionStatus.style.color = color;
 }
 
-// تولید شناسه جلسه
 function generateSessionId() {
     return Math.random().toString(36).substring(2, 15);
 }
 
-// رویدادهای جهانی
 window.loadVideo = loadVideo;
 window.copyShareLink = copyShareLink;

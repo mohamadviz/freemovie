@@ -38,6 +38,11 @@ body {
 }
 
 #connectionStatus {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
     font-size: 0.9rem;
     padding: 0.75rem;
     border-radius: 0.5rem;
@@ -55,6 +60,7 @@ body {
 #inputSection.show, #shareSection.show, #videoSection.show {
     opacity: 1;
     transform: translateY(0);
+    display: block !important;
 }
 
 .container {
@@ -75,7 +81,6 @@ body {
     }
 }
 
-/* انیمیشن‌های زیبا */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -85,27 +90,6 @@ body {
     animation: fadeIn 0.5s ease-in-out;
 }
 
-/* اضافه کردن این بخش به فایل style.css */
-#inputSection.show,
-#shareSection.show,
-#videoSection.show {
-    opacity: 1;
-    transform: translateY(0);
-    display: block !important;
-}
-
-#inputSection.hidden,
-#shareSection.hidden,
-#videoSection.hidden {
-    display: none !important;
-}
-
-/* اضافه کردن انیمیشن برای انتقال نرم */
-#videoPlayer {
-    transition: all 0.3s ease;
-}
-
-/* بهبود ظاهر دکمه‌ها */
 button, a {
     transition: all 0.2s ease;
 }
