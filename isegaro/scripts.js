@@ -346,28 +346,24 @@ Example:
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
                 if (response.status === 429) {
                     state.lastApiCallTimes[apiKey] = Date.now();
                     state.currentApiKeyIndex++;
                     if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
                     continue;
                 }
-                const errorText = await response.text();
                 throw new Error(`خطای Worker: ${response.status} - ${errorText}`);
             }
 
             const data = await response.json();
             if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                state.currentApiKeyIndex++;
-                if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
-                continue;
+                throw new Error('پاسخ API خالی یا نامعتبر است');
             }
 
             let translatedText = data.candidates[0].content.parts[0].text.trim();
             if (!translatedText) {
-                state.currentApiKeyIndex++;
-                if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
-                continue;
+                throw new Error('ترجمه دریافت‌شده خالی است');
             }
 
             translatedText = postProcessTranslation(translatedText, text, state.subtitleBlocks[blockIndex].startTime, state.subtitleBlocks[blockIndex].endTime);
@@ -381,7 +377,6 @@ Example:
         }
     }
 };
-
 // ذخیره در گوگل درایو (این بخش غیرفعال است چون نیاز به سرور دارد)
 const uploadToGoogleDrive = async (content, fileName) => {
     showFlashMessage('آپلود به گوگل درایو در این نسخه غیرفعال است', 'error');
