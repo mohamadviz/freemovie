@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پلی‌شو - تماشای همزمان ویدیو</title>
-    <meta name="description" content="پلی‌شو - با دوستانت ویدیوها رو آنلاین و همزمان تماشا کن">
+    <meta name="referrer" content="no-referrer">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -19,51 +19,6 @@
 
     <main class="container mx-auto flex-1 py-8 px-4">
         <div class="flex flex-col items-center gap-6">
-            <!-- بخش ورود لینک -->
-            <div class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow">
-                <input type="text" id="videoLink" class="w-full p-3 rounded-lg bg-gray-700 text-white" placeholder="لینک ویدیو (MP4, WebM)">
-                <div class="flex gap-3 mt-4">
-                    <button onclick="loadVideo()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">
-                        <i class="fas fa-play ml-2"></i> بارگذاری ویدیو
-                    </button>
-                </div>
-            </div>
-
-            <!-- بخش هماهنگی -->
-            <div id="syncSection" class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow hidden">
-                <div class="flex flex-col gap-4">
-                    <div class="flex gap-3">
-                        <button onclick="startSync()" id="hostBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">
-                            <i class="fas fa-user-shield ml-2"></i> میزبان شوید
-                        </button>
-                        <button onclick="joinSync()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg">
-                            <i class="fas fa-user-plus ml-2"></i> عضو شوید
-                        </button>
-                    </div>
-
-                    <div id="connectionSection" class="hidden">
-                        <textarea id="offerAnswer" class="w-full p-3 rounded-lg bg-gray-700 text-white" 
-                                  placeholder="کد اتصال اینجا قرار می‌گیرد..."></textarea>
-                        <button onclick="setRemoteDescription()" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg">
-                            <i class="fas fa-link ml-2"></i> برقراری اتصال
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- بخش اشتراک‌گذاری -->
-            <div id="shareSection" class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow hidden">
-                <div class="flex flex-col gap-4">
-                    <div class="flex gap-3">
-                        <input type="text" id="shareLink" class="flex-1 p-3 rounded-lg bg-gray-700 text-white" readonly>
-                        <button onclick="copyShareLink()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
-                            <i class="fas fa-copy ml-2"></i> کپی
-                        </button>
-                    </div>
-                    <p class="text-gray-400 text-sm">این لینک را برای دوستتان بفرستید تا به تماشای همزمان بپیوندد</p>
-                </div>
-            </div>
-
             <!-- پخش کننده ویدیو -->
             <div class="w-full max-w-4xl">
                 <video id="videoPlayer" controls class="w-full rounded-lg shadow-lg"></video>
