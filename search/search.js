@@ -248,13 +248,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // حذف debounce چون با دکمه کار نمی‌کنه
 
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const icon = document.querySelector('#theme-toggle i');
-    icon.classList.toggle('fa-sun');
-    icon.classList.toggle('fa-moon');
-});
-
 document.getElementById('menu-toggle')?.addEventListener('click', () => {
     document.getElementById('mobile-menu')?.classList.toggle('hidden');
 });
