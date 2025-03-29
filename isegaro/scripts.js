@@ -108,10 +108,25 @@ const loadProgress = () => {
     return false;
 };
 
-// File Handling
+// Time Conversion Utility
+const timeToSeconds = time => {
+    const [hours, minutes, seconds] = time.split(':');
+    const [sec, millis] = seconds.split(',');
+    return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(sec) + parseInt(millis) / 1000;
+};
+
+const secondsToTime = seconds => {
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+    const millis = Math.round((seconds % 1) * 1000).toString().padStart(3, '0');
+    return `${hours}:${minutes}:${secs},${millis}`;
+};
+
+// File Handling with Gap Detection
 const parseSRT = content => {
     content = content.replace(/\r/g, '');
-    return content.split(/\n\n+/)
+    const blocks = content.split(/\n\n+/)
         .filter(block => block.trim())
         .map(block => {
             try {
@@ -130,6 +145,37 @@ const parseSRT = content => {
             }
         })
         .filter(block => block !== null);
+
+    return insertCreditBlocks(blocks);
+};
+
+const insertCreditBlocks = blocks => {
+    const newBlocks = [];
+    let nextIndex = parseInt(blocks[blocks.length - 1].index) + 1;
+
+    for (let i = 0; i < blocks.length; i++) {
+        newBlocks.push(blocks[i]);
+
+        if (i < blocks.length - 1) {
+            const currentEnd = timeToSeconds(blocks[i].endTime);
+            const nextStart = timeToSeconds(blocks[i + 1].startTime);
+            const gap = nextStart - currentEnd;
+
+            if (gap > 4) { // اگر فاصله بیشتر از ۴ ثانیه باشد
+                const gapThird = gap / 3;
+                const creditStart = currentEnd + gapThird; // شروع بخش دوم (وسط)
+                const creditEnd = creditStart + gapThird;  // پایان بخش دوم
+
+                newBlocks.push({
+                    index: (nextIndex++).toString(),
+                    startTime: secondsToTime(creditStart),
+                    endTime: secondsToTime(creditEnd),
+                    text: "ترجمه شده توسط هوش مصنوعی فیری مووی"
+                });
+            }
+        }
+    }
+    return newBlocks;
 };
 
 // Subtitle Rendering
@@ -207,6 +253,9 @@ const getBlockContext = index => {
 };
 
 const translateSubtitle = async (text, model, blockIndex) => {
+    // اگر متن مربوط به فیری مووی باشد، نیازی به ترجمه نیست
+    if (text === "ترجمه شده توسط هوش مصنوعی فیری مووی") return text;
+
     const context = getBlockContext(blockIndex);
     const promptWithContext = elements.customPrompt.value.replace('{{CONTEXT}}', context);
     let allKeysLimited = false;
@@ -509,7 +558,9 @@ elements.saveButton.addEventListener('click', () => {
         showFlashMessage('Translated subtitles saved successfully!');
     } catch (error) {
         console.error('Error saving subtitles:', error);
-        showFlashMessage('Error saving subtitles: ' + error.message, 'error');
+        showFlashMessage('Error
+
+ saving subtitles: ' + error.message, 'error');
     }
 });
 
