@@ -16,8 +16,9 @@ window.onload = function() {
     setupVideoEventListeners();
 };
 
-
 function setupVideoEventListeners() {
+    if (!video) return;
+    
     video.addEventListener('play', () => {
         if (dataChannel?.readyState === 'open') {
             sendSyncData({
@@ -45,6 +46,7 @@ function setupVideoEventListeners() {
         }
     });
 }
+
 // بارگذاری ویدیو
 window.loadVideo = function() {
     const link = document.getElementById('videoLink').value.trim();
@@ -193,28 +195,6 @@ function sendSyncData(data) {
         dataChannel.send(JSON.stringify(data));
     }
 }
-
-// رویدادهای ویدیو برای هماهنگی
-video.addEventListener('play', () => {
-    sendSyncData({
-        time: video.currentTime,
-        isPlaying: true
-    });
-});
-
-video.addEventListener('pause', () => {
-    sendSyncData({
-        time: video.currentTime,
-        isPlaying: false
-    });
-});
-
-video.addEventListener('seeked', () => {
-    sendSyncData({
-        time: video.currentTime,
-        isPlaying: !video.paused
-    });
-});
 
 // نمایش وضعیت
 function showStatus(message, color) {
