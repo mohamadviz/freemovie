@@ -8,6 +8,7 @@ let isSyncing = false;
 
 // مقداردهی اولیه هنگام بارگذاری صفحه
 window.onload = function() {
+    // انتخاب المان‌های DOM
     video = document.getElementById('videoPlayer');
     connectionStatus = document.getElementById('connectionStatus');
     video.controls = false;
@@ -20,68 +21,54 @@ window.onload = function() {
     videoUrl = urlParams.get('video');
 
     if (videoUrl) {
-        // حالت میزبان یا مهمان - بارگذاری ویدیو
+        // حالت خودکار - بارگذاری ویدیو
+        showVideoSection();
         loadVideo(() => {
             if (offerParam) {
                 // حالت میزبان
-                isHost = true;
-                sessionId = joinParam;
-                setupPeerConnection();
-                const desc = JSON.parse(decodeURIComponent(offerParam));
-                peerConnection.setLocalDescription(desc);
+                setupHostConnection(joinParam, offerParam);
             } else if (joinParam && !offerParam && !answerParam) {
-                // حالت مهمان - ایجاد offer جدید
-                isHost = false;
-                sessionId = joinParam;
-                setupPeerConnection();
-                startGuestConnection();
+                // حالت مهمان - ایجاد اتصال
+                setupGuestConnection(joinParam);
             } else if (answerParam) {
-                // حالت میزبان - دریافت answer
-                const answer = JSON.parse(decodeURIComponent(answerParam));
-                if (peerConnection) {
-                    peerConnection.setRemoteDescription(answer);
-                }
+                // حالت میزبان - دریافت پاسخ
+                handleAnswer(answerParam);
             }
         });
-    } else if (joinParam && offerParam) {
-        // حالت مهمان - پیوستن به جلسه موجود
-        isHost = false;
-        sessionId = joinParam;
-        videoUrl = localStorage.getItem(`session_${sessionId}_videoUrl`);
-        if (videoUrl) {
-            loadVideo(() => {
-                setupPeerConnection();
-                const desc = JSON.parse(decodeURIComponent(offerParam));
-                peerConnection.setRemoteDescription(desc)
-                    .then(() => peerConnection.createAnswer())
-                    .then(answer => peerConnection.setLocalDescription(answer))
-                    .then(() => {
-                        const answerUrl = `https://m4tinbeigi-official.github.io/freemovie/playsho/?join=${sessionId}&video=${encodeURIComponent(videoUrl)}&answer=${encodeURIComponent(JSON.stringify(peerConnection.localDescription))}`;
-                        window.location.href = answerUrl;
-                    });
-            });
-        }
-    } else {
-        // حالت جدید - ایجاد جلسه
-        createNewSession();
     }
 };
 
-function createNewSession() {
-    sessionId = generateSessionId();
-    videoUrl = prompt('لطفاً لینک ویدیو را وارد کنید:');
-    
-    if (videoUrl) {
-        localStorage.setItem(`session_${sessionId}_videoUrl`, videoUrl);
-        const shareLink = `https://m4tinbeigi-official.github.io/freemovie/playsho/?join=${sessionId}&video=${encodeURIComponent(videoUrl)}`;
-        window.location.href = shareLink;
-    }
+// نمایش بخش ویدیو
+function showVideoSection() {
+    document.getElementById('inputSection').classList.add('hidden');
+    document.getElementById('videoSection').classList.remove('hidden');
 }
 
+// نمایش بخش ورود لینک
+function showInputSection() {
+    document.getElementById('inputSection').classList.remove('hidden');
+    document.getElementById('videoSection').classList.add('hidden');
+    document.getElementById('shareSection').classList.add('hidden');
+}
+
+// بارگذاری ویدیو
 function loadVideo(callback) {
-    if (!videoUrl) return;
+    const linkInput = document.getElementById('videoLink');
+    videoUrl = videoUrl || linkInput.value.trim();
+    
+    if (!videoUrl) {
+        showStatus('لطفاً لینک ویدیو را وارد کنید', 'red');
+        linkInput.focus();
+        return;
+    }
+
+    if (!isValidUrl(videoUrl)) {
+        showStatus('لینک ویدیو نامعتبر است', 'red');
+        return;
+    }
 
     showStatus('در حال بارگذاری ویدیو...', 'blue');
+    
     video.src = videoUrl;
     video.load();
     
@@ -89,43 +76,72 @@ function loadVideo(callback) {
         video.controls = true;
         setupVideoEventListeners();
         showStatus('ویدیو آماده پخش است', 'green');
+        
+        if (!sessionId) {
+            createNewSession();
+        }
+        
         if (callback) callback();
     };
     
     video.onerror = () => {
         showStatus('خطا در بارگذاری ویدیو', 'red');
+        showInputSection();
     };
 }
 
+// اعتبارسنجی URL
+function isValidUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// ایجاد جلسه جدید
+function createNewSession() {
+    sessionId = generateSessionId();
+    localStorage.setItem(`session_${sessionId}_videoUrl`, videoUrl);
+    setupShareSection();
+}
+
+// تنظیم بخش اشتراک‌گذاری
+function setupShareSection() {
+    const shareLink = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}`;
+    document.getElementById('shareLink').value = shareLink;
+    
+    const shareText = 'به تماشای همزمان این ویدیو با من بپیوندید: ';
+    document.getElementById('whatsappShare').href = `https://wa.me/?text=${encodeURIComponent(shareText + shareLink)}`;
+    document.getElementById('telegramShare').href = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
+    
+    document.getElementById('shareSection').classList.remove('hidden');
+}
+
+// کپی لینک اشتراک‌گذاری
+function copyShareLink() {
+    const shareLink = document.getElementById('shareLink');
+    shareLink.select();
+    document.execCommand('copy');
+    showStatus('لینک با موفقیت کپی شد!', 'green');
+    shareLink.classList.add('bg-blue-900');
+    setTimeout(() => shareLink.classList.remove('bg-blue-900'), 300);
+}
+
+// تنظیم رویدادهای ویدیو
 function setupVideoEventListeners() {
-    // رویداد پخش
-    video.addEventListener('play', () => {
-        if (!isSyncing && dataChannel?.readyState === 'open') {
-            sendSyncData({
-                type: 'play',
-                time: video.currentTime
-            });
-        }
-    });
-
-    // رویداد توقف
-    video.addEventListener('pause', () => {
-        if (!isSyncing && dataChannel?.readyState === 'open') {
-            sendSyncData({
-                type: 'pause',
-                time: video.currentTime
-            });
-        }
-    });
-
-    // رویداد جستجو
-    video.addEventListener('seeked', () => {
-        if (!isSyncing && dataChannel?.readyState === 'open') {
-            sendSyncData({
-                type: 'seek',
-                time: video.currentTime
-            });
-        }
+    const events = ['play', 'pause', 'seeked'];
+    events.forEach(event => {
+        video.addEventListener(event, () => {
+            if (!isSyncing && dataChannel?.readyState === 'open') {
+                sendSyncData({
+                    type: event,
+                    time: video.currentTime,
+                    isPlaying: !video.paused
+                });
+            }
+        });
     });
 
     // تشخیص توقف کامل
@@ -135,7 +151,8 @@ function setupVideoEventListeners() {
             if (dataChannel?.readyState === 'open') {
                 sendSyncData({
                     type: 'stop',
-                    time: 0
+                    time: 0,
+                    isPlaying: false
                 });
             }
         }
@@ -144,17 +161,42 @@ function setupVideoEventListeners() {
     setInterval(checkStop, 300);
 }
 
-function startGuestConnection() {
+// تنظیم اتصال میزبان
+function setupHostConnection(joinId, offerData) {
+    isHost = true;
+    sessionId = joinId;
     setupPeerConnection();
-    
+    const desc = JSON.parse(decodeURIComponent(offerData));
+    peerConnection.setLocalDescription(desc);
+}
+
+// تنظیم اتصال مهمان
+function setupGuestConnection(joinId) {
+    isHost = false;
+    sessionId = joinId;
+    setupPeerConnection();
+    startGuestConnection();
+}
+
+// شروع اتصال مهمان
+function startGuestConnection() {
     peerConnection.createOffer()
         .then(offer => peerConnection.setLocalDescription(offer))
         .then(() => {
-            const offerUrl = `https://m4tinbeigi-official.github.io/freemovie/playsho/?join=${sessionId}&video=${encodeURIComponent(videoUrl)}&offer=${encodeURIComponent(JSON.stringify(peerConnection.localDescription))}`;
+            const offerUrl = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}&offer=${encodeURIComponent(JSON.stringify(peerConnection.localDescription))}`;
             window.location.href = offerUrl;
         });
 }
 
+// مدیریت پاسخ مهمان
+function handleAnswer(answerData) {
+    const answer = JSON.parse(decodeURIComponent(answerData));
+    if (peerConnection) {
+        peerConnection.setRemoteDescription(answer);
+    }
+}
+
+// تنظیم اتصال Peer
 function setupPeerConnection() {
     peerConnection = new RTCPeerConnection({
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -177,10 +219,15 @@ function setupPeerConnection() {
     };
 
     peerConnection.onconnectionstatechange = () => {
-        showStatus(`وضعیت اتصال: ${peerConnection.connectionState}`, 'blue');
+        const status = peerConnection.connectionState;
+        showStatus(`وضعیت اتصال: ${status}`, 'blue');
+        if (status === 'disconnected' || status === 'failed') {
+            setTimeout(() => window.location.reload(), 3000);
+        }
     };
 }
 
+// تنظیم کانال داده
 function setupDataChannel() {
     dataChannel.onopen = () => {
         showStatus('اتصال برقرار شد! هماهنگی فعال است', 'green');
@@ -207,7 +254,7 @@ function setupDataChannel() {
                 video.currentTime = data.time;
                 video.pause();
                 break;
-            case 'seek':
+            case 'seeked':
                 video.currentTime = data.time;
                 break;
             case 'stop':
@@ -234,17 +281,26 @@ function setupDataChannel() {
     };
 }
 
+// ارسال داده همگام‌سازی
 function sendSyncData(data) {
     if (dataChannel && dataChannel.readyState === 'open') {
         dataChannel.send(JSON.stringify(data));
     }
 }
 
+// نمایش وضعیت
 function showStatus(message, color) {
     connectionStatus.textContent = message;
     connectionStatus.style.color = color;
 }
 
+// تولید شناسه جلسه
 function generateSessionId() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
+
+// رویداد کلیک دکمه بارگذاری ویدیو
+window.loadVideo = loadVideo;
+
+// رویداد کلیک دکمه کپی لینک
+window.copyShareLink = copyShareLink;

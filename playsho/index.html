@@ -14,13 +14,47 @@
     <header class="bg-gray-800 p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold">پلی‌شو - تماشای گروهی</h1>
+            <a href="https://m4tinbeigi-official.github.io/freemovie/playsho/" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
+                <i class="fas fa-plus ml-2"></i> فیلم جدید
+            </a>
         </div>
     </header>
 
     <main class="container mx-auto flex-1 py-8 px-4">
         <div class="flex flex-col items-center gap-6">
+            <!-- بخش ورود لینک -->
+            <div id="inputSection" class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow transition-all duration-300">
+                <div class="relative">
+                    <input type="text" id="videoLink" class="w-full p-4 pr-12 rounded-lg bg-gray-700 text-white text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="https://example.com/video.mp4">
+                    <button onclick="loadVideo()" class="absolute left-3 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- بخش اشتراک‌گذاری -->
+            <div id="shareSection" class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow hidden transition-all duration-300">
+                <h2 class="text-lg font-semibold mb-4 text-center">لینک اشتراک‌گذاری</h2>
+                <div class="flex flex-col gap-4">
+                    <div class="relative">
+                        <input type="text" id="shareLink" class="w-full p-3 rounded-lg bg-gray-700 text-white font-mono text-sm" readonly>
+                        <button onclick="copyShareLink()" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-sm">
+                            <i class="fas fa-copy ml-1"></i> کپی
+                        </button>
+                    </div>
+                    <div class="flex gap-3">
+                        <a id="whatsappShare" href="#" target="_blank" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-center flex items-center justify-center">
+                            <i class="fab fa-whatsapp ml-2"></i> واتساپ
+                        </a>
+                        <a id="telegramShare" href="#" target="_blank" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-center flex items-center justify-center">
+                            <i class="fab fa-telegram ml-2"></i> تلگرام
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- پخش کننده ویدیو -->
-            <div class="w-full max-w-4xl">
+            <div id="videoSection" class="w-full max-w-4xl hidden transition-all duration-300">
                 <video id="videoPlayer" controls class="w-full rounded-lg shadow-lg"></video>
                 <div id="connectionStatus" class="mt-3 text-center text-gray-300"></div>
             </div>
