@@ -1,4 +1,3 @@
-// script.js
 let peerConnection, dataChannel;
 let isHost = false;
 let currentSession = {
@@ -16,7 +15,17 @@ const ICE_CONFIG = {
     ]
 };
 
-// Initialize
+// تابع جدید برای مدیریت پارامترهای اتصال
+function handleConnectionParams(offerParam, answerParam) {
+    if(offerParam) {
+        isHost = true;
+        setupHostConnection(currentSession.id, offerParam);
+    } else if(answerParam) {
+        handleAnswer(answerParam);
+    }
+}
+
+// اصلاح بخش مقداردهی اولیه
 window.onload = () => {
     const urlParams = new URLSearchParams(location.search);
     currentSession.id = urlParams.get('join');
@@ -24,7 +33,10 @@ window.onload = () => {
 
     if(currentSession.videoUrl) {
         initializeVideoPlayer();
-        handleConnectionParams(urlParams);
+        handleConnectionParams( // نام تابع اصلاح شد
+            urlParams.get('offer'),
+            urlParams.get('answer')
+        );
     }
 };
 
