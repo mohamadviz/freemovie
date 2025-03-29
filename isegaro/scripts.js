@@ -52,15 +52,15 @@ const showFlashMessage = (message, type = 'success') => {
 const copyWallet = () => {
     const wallet = "TQKZ2nMjsDiEZjfKR9Dkh5Ka5byjUs8b8U";
     navigator.clipboard.writeText(wallet);
-    showFlashMessage('USDT Wallet address copied to clipboard!', 'success');
+    showFlashMessage('آدرس کیف‌پول USDT کپی شد!', 'success');
 };
 
 // API Key Management
 const addNewApiKeyInput = (value = '') => {
     const newApiKeyInput = document.createElement('div');
-    newApiKeyInput.className = 'flex items-center space-x-2 mt-2';
+    newApiKeyInput.className = 'flex items-center space-x-2 space-x-reverse mt-2';
     newApiKeyInput.innerHTML = `
-        <input type="text" value="${value}" placeholder="Enter another API Key" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm api-key-input">
+        <input type="text" value="${value}" placeholder="یک کلید API دیگر وارد کنید" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm api-key-input" dir="ltr">
         <button class="remove-api-key-btn bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition duration-300">-</button>
     `;
     elements.apiKeyList.appendChild(newApiKeyInput);
@@ -139,12 +139,13 @@ const parseSRT = content => {
                 const [startTime, endTime] = timing.split('-->').map(t => t.trim());
                 return { index, startTime, endTime, text };
             } catch (error) {
-                console.error('Error parsing block:', block);
+                console.error('خطا در پارس بلوک:', block);
                 return null;
             }
         })
         .filter(block => block !== null);
 
+    if (blocks.length === 0) showFlashMessage('فایل SRT معتبر نیست یا خالی است', 'error');
     return insertCreditBlocks(blocks);
 };
 
@@ -190,7 +191,7 @@ const renderSubtitles = (container, blocks, isEditable = false) => {
     blocks.forEach((block, index) => {
         const isTranslated = index <= state.lastTranslatedIndex;
         const subtitleBlock = document.createElement('div');
-        subtitleBlock.className = 'flex space-x-4 subtitle-block';
+        subtitleBlock.className = 'flex space-x-4 space-x-reverse subtitle-block';
 
         const retranslateButton = isTranslated && isTranslatedContainer ? 
             `<button class="retranslate-btn text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" data-index="${index}">
@@ -208,7 +209,7 @@ const renderSubtitles = (container, blocks, isEditable = false) => {
             <div class="w-10 h-10 flex items-center justify-center ${isTranslated ? 'bg-green-200' : 'bg-gray-200'} text-gray-600 font-bold text-center rounded-full text-xs">${block.index}</div>
             <div class="flex-grow space-y-2">
                 <div class="flex justify-between items-center">
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-2 space-x-reverse">
                         <div class="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">${block.startTime}</div>
                         <span class="text-gray-500 font-medium text-xs">→</span>
                         <div class="bg-red-100 text-red-700 font-medium px-3 py-1 rounded-full text-xs">${block.endTime}</div>
@@ -299,22 +300,21 @@ const translateSubtitle = async (text, model, blockIndex) => {
     const context = getBlockContext(blockIndex);
     const sourceLang = detectLanguage(text);
     const improvedPrompt = `
-You are an expert cinematic subtitle translator. Translate ONLY the "current" subtitle (index: 0) from "${sourceLang === 'und' ? 'any language' : sourceLang}" to Persian.
+You are an expert subtitle translator. Translate ONLY the "current" subtitle (index: 0) from "${sourceLang === 'und' ? 'any language' : sourceLang}" to Persian.
 
-CRITICAL INSTRUCTIONS:
-- The JSON array in {{CONTEXT}} provides surrounding subtitles for context:
-  - Index -1 or lower = "previous" subtitles
-  - Index 0 = "current" subtitle (THE ONLY ONE YOU TRANSLATE)
-  - Index 1 or higher = "next" subtitles
-- Translate with 100% fidelity to the original meaning, preserving tone (e.g., casual, formal, humorous) and intent.
-- Use natural, conversational Persian that flows smoothly for viewers.
-- Do NOT add or omit words unless explicitly inappropriate (e.g., extreme profanity, explicit content, hate speech), then replace ONLY that part with ***.
-- Keep the translation concise, matching the brevity of subtitles.
+Instructions:
+- Use the JSON array in {{CONTEXT}} for context:
+  - Index -1 or lower: previous subtitles
+  - Index 0: current subtitle (translate this only)
+  - Index 1 or higher: next subtitles
+- Maintain the original meaning and tone (e.g., casual, formal, humorous).
+- Keep it concise and natural for Persian subtitles.
+- Replace inappropriate content (e.g., profanity) with ***.
 
-STRICT RULES:
-1. Respond ONLY with the Persian translation of the "current" subtitle.
-2. Do NOT include text from "previous" or "next" subtitles.
-3. Do NOT add explanations or extra formatting.
+Rules:
+- Return only the Persian translation of the current subtitle.
+- Do not include text from previous or next subtitles.
+- No extra formatting or explanations.
 
 Example:
 - Input: "I love you" (index: 0)
@@ -326,16 +326,16 @@ Example:
     let allKeysLimited = false;
 
     while (true) {
-        if (!state.isTranslating) throw new Error('Translation stopped by user.');
+        if (!state.isTranslating) throw new Error('ترجمه توسط کاربر متوقف شد.');
         if (state.currentApiKeyIndex >= state.apiKeys.length) {
             if (allKeysLimited) {
                 const waitTime = parseInt(elements.waitTimeInput.value) || 60;
-                showFlashMessage(`All API keys are rate limited. Waiting ${waitTime} seconds...`);
+                showFlashMessage(`همه کلیدهای API محدود شده‌اند. ${waitTime} ثانیه صبر کنید...`);
                 await delay(waitTime * 1000);
                 state.currentApiKeyIndex = 0;
                 allKeysLimited = false;
                 state.lastApiCallTimes = {};
-                showFlashMessage('Resuming translation...', 'success');
+                showFlashMessage('از سرگیری ترجمه...', 'success');
                 return await translateSubtitle(text, model, blockIndex);
             }
             state.currentApiKeyIndex = 0;
@@ -356,7 +356,7 @@ Example:
                     if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
                     continue;
                 }
-                throw new Error(`API Error: ${response.status}`);
+                throw new Error(`خطای API: ${response.status}`);
             }
 
             const data = await response.json();
@@ -377,7 +377,7 @@ Example:
             translatedText = postProcessTranslation(translatedText, text, state.subtitleBlocks[blockIndex].startTime, state.subtitleBlocks[blockIndex].endTime);
             return translatedText;
         } catch (error) {
-            console.error(`Error with API key ${state.currentApiKeyIndex + 1}:`, error);
+            console.error(`خطا با کلید API شماره ${state.currentApiKeyIndex + 1}:`, error);
             state.currentApiKeyIndex++;
             if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
             continue;
@@ -417,18 +417,18 @@ const uploadToGoogleDrive = async (content, fileName) => {
             body: multipartRequestBody
         });
 
-        if (!response.ok) throw new Error('Failed to upload to Google Drive');
+        if (!response.ok) throw new Error('خطا در آپلود به گوگل درایو');
         const data = await response.json();
-        showFlashMessage(`File uploaded to Google Drive with ID: ${data.id}`, 'success');
+        showFlashMessage(`فایل با موفقیت در گوگل درایو آپلود شد. ID: ${data.id}`, 'success');
     } catch (error) {
-        console.error('Google Drive upload error:', error);
-        showFlashMessage('Failed to upload to Google Drive: ' + error.message, 'error');
+        console.error('خطای آپلود در گوگل درایو:', error);
+        showFlashMessage('خطا در آپلود به گوگل درایو: ' + error.message, 'error');
     }
 };
 
 const retranslateBlock = async index => {
     if (!state.apiKeys.length) {
-        showFlashMessage('Please enter API Key first', 'error');
+        showFlashMessage('لطفاً ابتدا کلید API را وارد کنید', 'error');
         return;
     }
 
@@ -444,11 +444,11 @@ const retranslateBlock = async index => {
         const translatedText = await translateSubtitle(block.text, model, index);
         state.translatedBlocks[index] = { ...block, text: translatedText };
         renderSubtitles(elements.translatedSubtitleContainer, state.translatedBlocks, state.isEditMode);
-        showFlashMessage('Block retranslated successfully!', 'success');
+        showFlashMessage('بلوک با موفقیت بازترجمه شد!', 'success');
         saveProgress();
         state.isTranslating = previousTranslatingState;
     } catch (error) {
-        showFlashMessage('Failed to retranslate block: ' + error.message, 'error');
+        showFlashMessage('خطا در بازترجمه بلوک: ' + error.message, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = `
@@ -466,7 +466,7 @@ const translateBlock = async (block, model, index, totalBlocks) => {
     while (retryCount < maxRetries) {
         try {
             const translatedText = await translateSubtitle(block.text, model, index);
-            if (!translatedText || translatedText.trim().length === 0) throw new Error('Empty translation received');
+            if (!translatedText || translatedText.trim().length === 0) throw new Error('ترجمه خالی دریافت شد');
             const translatedBlock = { ...block, text: translatedText };
             state.translatedBlocks[index] = translatedBlock;
             state.lastTranslatedIndex = index;
@@ -481,11 +481,11 @@ const translateBlock = async (block, model, index, totalBlocks) => {
             if (lastSubtitle) lastSubtitle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             return true;
         } catch (error) {
-            if (error.message === 'Translation stopped by user.') throw error;
+            if (error.message === 'ترجمه توسط کاربر متوقف شد.') throw error;
             retryCount++;
-            console.error(`Translation attempt ${retryCount} failed for subtitle ${block.index}:`, error.message);
+            console.error(`تلاش ${retryCount} برای ترجمه زیرنویس ${block.index} ناموفق بود:`, error.message);
             if (retryCount === maxRetries) {
-                showFlashMessage(`Failed to translate subtitle ${block.index} after ${maxRetries} attempts. Skipping...`, 'error');
+                showFlashMessage(`ترجمه زیرنویس ${block.index} پس از ${maxRetries} تلاش ناموفق بود. رد می‌شود...`, 'error');
                 return false;
             }
             await delay(2000);
@@ -536,37 +536,44 @@ elements.fileInput.addEventListener('change', event => {
         const reader = new FileReader();
         reader.onload = e => {
             const content = e.target.result;
+            console.log('محتوای فایل SRT:', content); // دیباگ
             state.subtitleBlocks = parseSRT(content);
-            renderSubtitles(elements.originalSubtitleContainer, state.subtitleBlocks, false);
-            if (!loadProgress()) {
-                elements.saveButton.disabled = true;
-                elements.continueButton.classList.add('hidden');
+            console.log('بلوک‌های پارس‌شده:', state.subtitleBlocks); // دیباگ
+            if (state.subtitleBlocks.length > 0) {
+                renderSubtitles(elements.originalSubtitleContainer, state.subtitleBlocks, false);
+                if (!loadProgress()) {
+                    elements.saveButton.disabled = true;
+                    elements.continueButton.classList.add('hidden');
+                }
+            } else {
+                showFlashMessage('فایل SRT معتبر نیست یا خالی است', 'error');
             }
         };
+        reader.onerror = () => showFlashMessage('خطا در خواندن فایل', 'error');
         reader.readAsText(file);
     }
 });
 
 elements.translateButton.addEventListener('click', async () => {
-    if (!state.subtitleBlocks.length) return showFlashMessage('Please upload a subtitle file first.', 'error');
+    if (!state.subtitleBlocks.length) return showFlashMessage('لطفاً ابتدا یک فایل زیرنویس بارگذاری کنید.', 'error');
     if (state.isTranslating) {
         state.isTranslating = false;
-        elements.translateButton.textContent = 'Translate';
+        elements.translateButton.textContent = 'ترجمه';
         elements.progressContainer.classList.add('hidden');
         if (state.translatedBlocks.length > 0) {
             elements.saveButton.disabled = false;
             elements.continueButton.classList.remove('hidden');
-            showFlashMessage('Translation stopped. You can continue later or save partial translations.');
+            showFlashMessage('ترجمه متوقف شد. می‌توانید بعداً ادامه دهید یا ترجمه‌های ناتمام را ذخیره کنید.');
         }
         return;
     }
 
     updateApiKeys();
-    if (state.apiKeys.length === 0) return showFlashMessage('Please enter at least one valid API Key.', 'error');
+    if (state.apiKeys.length === 0) return showFlashMessage('لطفاً حداقل یک کلید API معتبر وارد کنید.', 'error');
 
     const model = elements.modelSelector.value;
     state.isTranslating = true;
-    elements.translateButton.textContent = 'Stop';
+    elements.translateButton.textContent = 'توقف';
     elements.progressContainer.classList.remove('hidden');
     elements.progressBarFill.style.width = '0%';
     elements.progressText.textContent = '0%';
@@ -587,17 +594,17 @@ elements.translateButton.addEventListener('click', async () => {
                 .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                 .join('\n\n');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const fileName = `translated_subtitle_${timestamp}.srt`;
+            const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
             await uploadToGoogleDrive(content, fileName);
         }
     } finally {
         if (!state.isTranslating) {
-            elements.translateButton.textContent = 'Translate';
+            elements.translateButton.textContent = 'ترجمه';
             if (state.lastTranslatedIndex >= 0) elements.continueButton.classList.remove('hidden');
         } else {
             state.isTranslating = false;
-            elements.translateButton.textContent = 'Translate';
-            if (state.lastTranslatedIndex === totalBlocks - 1) showFlashMessage('Translation completed successfully!');
+            elements.translateButton.textContent = 'ترجمه';
+            if (state.lastTranslatedIndex === totalBlocks - 1) showFlashMessage('ترجمه با موفقیت به پایان رسید!');
         }
         setTimeout(() => elements.progressContainer.classList.add('hidden'), 2000);
     }
@@ -606,11 +613,11 @@ elements.translateButton.addEventListener('click', async () => {
 elements.continueButton.addEventListener('click', async () => {
     if (!state.isTranslating && state.lastTranslatedIndex < state.subtitleBlocks.length - 1) {
         updateApiKeys();
-        if (state.apiKeys.length === 0) return showFlashMessage('Please enter at least one valid API Key.', 'error');
+        if (state.apiKeys.length === 0) return showFlashMessage('لطفاً حداقل یک کلید API معتبر وارد کنید.', 'error');
 
         const model = elements.modelSelector.value;
         state.isTranslating = true;
-        elements.translateButton.textContent = 'Stop';
+        elements.translateButton.textContent = 'توقف';
         elements.continueButton.classList.add('hidden');
         elements.progressContainer.classList.remove('hidden');
 
@@ -631,21 +638,21 @@ elements.continueButton.addEventListener('click', async () => {
                     .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                     .join('\n\n');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const fileName = `translated_subtitle_${timestamp}.srt`;
+                const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
                 await uploadToGoogleDrive(content, fileName);
             }
         } finally {
             if (!state.isTranslating) {
-                elements.translateButton.textContent = 'Translate';
+                elements.translateButton.textContent = 'ترجمه';
                 if (state.lastTranslatedIndex >= 0) elements.continueButton.classList.remove('hidden');
             } else {
                 state.isTranslating = false;
-                elements.translateButton.textContent = 'Translate';
+                elements.translateButton.textContent = 'ترجمه';
                 if (state.lastTranslatedIndex === totalBlocks - 1) {
-                    showFlashMessage('Translation completed successfully!');
+                    showFlashMessage('ترجمه با موفقیت به پایان رسید!');
                 } else {
                     elements.continueButton.classList.remove('hidden');
-                    showFlashMessage('Translation paused. Click Continue to resume.');
+                    showFlashMessage('ترجمه متوقف شد. برای ادامه کلیک کنید.');
                 }
             }
             setTimeout(() => elements.progressContainer.classList.add('hidden'), 2000);
@@ -664,12 +671,12 @@ elements.editToggle.addEventListener('click', () => {
     }
     state.isEditMode = !state.isEditMode;
     renderSubtitles(elements.translatedSubtitleContainer, state.translatedBlocks, state.isEditMode);
-    elements.editToggle.textContent = state.isEditMode ? 'Save Edits' : 'Edit Translations';
+    elements.editToggle.textContent = state.isEditMode ? 'ذخیره تغییرات' : 'ویرایش ترجمه‌ها';
 });
 
 elements.saveButton.addEventListener('click', async () => {
     try {
-        if (state.translatedBlocks.length === 0) throw new Error('No translated subtitles to save');
+        if (state.translatedBlocks.length === 0) throw new Error('هیچ زیرنویس ترجمه‌شده‌ای برای ذخیره وجود ندارد');
         const content = state.translatedBlocks
             .filter(block => block)
             .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
@@ -679,7 +686,7 @@ elements.saveButton.addEventListener('click', async () => {
         const a = document.createElement('a');
         a.href = url;
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `translated_subtitle_${timestamp}.srt`;
+        const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
         a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
@@ -687,10 +694,10 @@ elements.saveButton.addEventListener('click', async () => {
         // آپلود به گوگل درایو
         await uploadToGoogleDrive(content, fileName);
 
-        showFlashMessage('Translated subtitles saved successfully!');
+        showFlashMessage('زیرنویس‌های ترجمه‌شده با موفقیت ذخیره شدند!');
     } catch (error) {
-        console.error('Error saving subtitles:', error);
-        showFlashMessage('Error saving subtitles: ' + error.message, 'error');
+        console.error('خطا در ذخیره زیرنویس‌ها:', error);
+        showFlashMessage('خطا در ذخیره زیرنویس‌ها: ' + error.message, 'error');
     }
 });
 
