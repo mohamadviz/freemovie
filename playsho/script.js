@@ -1,12 +1,21 @@
-const video = document.getElementById('videoPlayer');
-const connectionInfo = document.getElementById('connectionInfo');
-const offerAnswerTextarea = document.getElementById('offerAnswer');
-const setRemoteBtn = document.getElementById('setRemoteBtn');
-let peerConnection;
-let dataChannel;
+// Global variables
+var video;
+var connectionInfo;
+var offerAnswerTextarea;
+var setRemoteBtn;
+var peerConnection;
+var dataChannel;
+
+// Initialize when page loads
+window.onload = function() {
+    video = document.getElementById('videoPlayer');
+    connectionInfo = document.getElementById('connectionInfo');
+    offerAnswerTextarea = document.getElementById('offerAnswer');
+    setRemoteBtn = document.getElementById('setRemoteBtn');
+};
 
 // بارگذاری ویدیو
-function loadVideo() {
+window.loadVideo = function() {
     const link = document.getElementById('videoLink').value.trim();
     if (!link) {
         connectionInfo.textContent = 'لطفاً یه لینک معتبر وارد کن';
@@ -21,13 +30,13 @@ function loadVideo() {
     } catch (err) {
         connectionInfo.textContent = `خطا در بارگذاری ویدیو: ${err.message}`;
     }
-}
+};
 
 // راه‌اندازی WebRTC برای همگام‌سازی
-function startSync() {
+window.startSync = function() {
     try {
         peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // سرور STUN برای اتصال بهتر
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
         });
 
         // کانال داده برای ارسال زمان ویدیو
@@ -38,7 +47,7 @@ function startSync() {
         };
         dataChannel.onmessage = (event) => {
             const time = JSON.parse(event.data);
-            if (Math.abs(video.currentTime - time) > 0.5) { // فقط اگر اختلاف زیاد باشه
+            if (Math.abs(video.currentTime - time) > 0.5) {
                 video.currentTime = time;
             }
         };
@@ -69,10 +78,10 @@ function startSync() {
     } catch (err) {
         connectionInfo.textContent = `خطا در راه‌اندازی WebRTC: ${err.message}`;
     }
-}
+};
 
 // تنظیم Answer یا Offer از طرف مقابل
-function setRemoteDescription() {
+window.setRemoteDescription = function() {
     const remoteDesc = offerAnswerTextarea.value.trim();
     if (!remoteDesc) {
         connectionInfo.textContent = 'لطفاً Offer یا Answer رو وارد کن';
@@ -98,7 +107,7 @@ function setRemoteDescription() {
     } catch (err) {
         connectionInfo.textContent = `فرمت اشتباه: ${err.message}`;
     }
-}
+};
 
 // همگام‌سازی دوره‌ای زمان ویدیو
 function syncVideoTime() {
@@ -106,7 +115,7 @@ function syncVideoTime() {
         if (dataChannel?.readyState === 'open' && !video.paused) {
             dataChannel.send(JSON.stringify(video.currentTime));
         }
-    }, 2000); // هر ۲ ثانیه برای کاهش بار
+    }, 2000);
 }
 
 // رویدادهای ویدیو
@@ -119,4 +128,4 @@ video.addEventListener('pause', () => {
     if (dataChannel?.readyState === 'open') {
         dataChannel.send(JSON.stringify(video.currentTime));
     }
-});
+})
