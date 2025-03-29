@@ -1,26 +1,46 @@
 body {
     font-family: "Vazir", sans-serif;
     direction: rtl;
+    line-height: 1.6;
 }
 
 video {
     max-width: 100%;
     height: auto;
+    background: #000;
 }
 
 button {
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
 }
 
-#connectionInfo {
-    color: #bbb;
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#connectionStatus {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+#offerAnswer {
+    min-height: 100px;
+    resize: vertical;
 }
 
 @media (max-width: 640px) {
     .container {
         padding: 0 1rem;
     }
-    video {
-        width: 100%;
+    
+    .flex-col {
+        gap: 1rem;
+    }
+    
+    button {
+        padding: 0.5rem;
+        font-size: 0.9rem;
     }
 }

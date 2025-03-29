@@ -1,131 +1,190 @@
-// Global variables
-var video;
-var connectionInfo;
-var offerAnswerTextarea;
-var setRemoteBtn;
-var peerConnection;
-var dataChannel;
+// متغیرهای اصلی
+let video, connectionStatus;
+let peerConnection, dataChannel;
+let isHost = false;
 
-// Initialize when page loads
+// مقداردهی اولیه هنگام بارگذاری صفحه
 window.onload = function() {
     video = document.getElementById('videoPlayer');
-    connectionInfo = document.getElementById('connectionInfo');
-    offerAnswerTextarea = document.getElementById('offerAnswer');
-    setRemoteBtn = document.getElementById('setRemoteBtn');
+    connectionStatus = document.getElementById('connectionStatus');
+    
+    // مخفی کردن کنترل‌های ویدیو تا زمانی که ویدیو بارگذاری شود
+    video.controls = false;
 };
 
 // بارگذاری ویدیو
 window.loadVideo = function() {
     const link = document.getElementById('videoLink').value.trim();
     if (!link) {
-        connectionInfo.textContent = 'لطفاً یه لینک معتبر وارد کن';
+        showStatus('لطفاً لینک ویدیو را وارد کنید', 'red');
         return;
     }
-    try {
-        video.src = link;
-        video.load();
-        video.play().catch(err => {
-            connectionInfo.textContent = `خطا در پخش ویدیو: ${err.message}`;
-        });
-    } catch (err) {
-        connectionInfo.textContent = `خطا در بارگذاری ویدیو: ${err.message}`;
-    }
+
+    showStatus('در حال بارگذاری ویدیو...', 'blue');
+    video.src = link;
+    video.load();
+    
+    video.onloadeddata = () => {
+        video.controls = true;
+        document.getElementById('syncSection').classList.remove('hidden');
+        showStatus('ویدیو آماده پخش است', 'green');
+    };
+    
+    video.onerror = () => {
+        showStatus('خطا در بارگذاری ویدیو', 'red');
+    };
 };
 
-// راه‌اندازی WebRTC برای همگام‌سازی
+// شروع هماهنگی به عنوان میزبان
 window.startSync = function() {
-    try {
-        peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    isHost = true;
+    setupPeerConnection();
+    
+    peerConnection.createOffer()
+        .then(offer => peerConnection.setLocalDescription(offer))
+        .then(() => {
+            document.getElementById('offerAnswer').value = JSON.stringify(peerConnection.localDescription);
+            document.getElementById('connectionSection').classList.remove('hidden');
+            showStatus('کد میزبانی شما آماده است. آن را برای دوستتان بفرستید', 'green');
+        })
+        .catch(err => {
+            showStatus(`خطا در ایجاد اتصال: ${err}`, 'red');
         });
-
-        // کانال داده برای ارسال زمان ویدیو
-        dataChannel = peerConnection.createDataChannel('syncChannel');
-        dataChannel.onopen = () => {
-            connectionInfo.textContent = 'اتصال برقرار شد! حالا می‌تونی ویدیو رو هماهنگ کنی.';
-            syncVideoTime();
-        };
-        dataChannel.onmessage = (event) => {
-            const time = JSON.parse(event.data);
-            if (Math.abs(video.currentTime - time) > 0.5) {
-                video.currentTime = time;
-            }
-        };
-        dataChannel.onclose = () => {
-            connectionInfo.textContent = 'اتصال بسته شد.';
-        };
-
-        // مدیریت ICE Candidates
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                console.log('ICE Candidate:', event.candidate);
-            }
-        };
-
-        // ایجاد Offer
-        peerConnection.createOffer()
-            .then(offer => peerConnection.setLocalDescription(offer))
-            .then(() => {
-                offerAnswerTextarea.value = JSON.stringify(peerConnection.localDescription);
-                offerAnswerTextarea.classList.remove('hidden');
-                setRemoteBtn.classList.remove('hidden');
-                connectionInfo.textContent = 'Offer رو کپی کن و به دوستت بده.';
-            })
-            .catch(err => {
-                connectionInfo.textContent = `خطا در ایجاد Offer: ${err.message}`;
-            });
-
-    } catch (err) {
-        connectionInfo.textContent = `خطا در راه‌اندازی WebRTC: ${err.message}`;
-    }
 };
 
-// تنظیم Answer یا Offer از طرف مقابل
+// پیوستن به هماهنگی به عنوان مهمان
+window.joinSync = function() {
+    isHost = false;
+    setupPeerConnection();
+    document.getElementById('connectionSection').classList.remove('hidden');
+    showStatus('کد میزبان را وارد کنید', 'blue');
+};
+
+// تنظیم اتصال
 window.setRemoteDescription = function() {
-    const remoteDesc = offerAnswerTextarea.value.trim();
+    const remoteDesc = document.getElementById('offerAnswer').value.trim();
     if (!remoteDesc) {
-        connectionInfo.textContent = 'لطفاً Offer یا Answer رو وارد کن';
+        showStatus('لطفاً کد اتصال را وارد کنید', 'red');
         return;
     }
+
     try {
-        peerConnection.setRemoteDescription(JSON.parse(remoteDesc))
+        const desc = JSON.parse(remoteDesc);
+        peerConnection.setRemoteDescription(desc)
             .then(() => {
-                if (peerConnection.remoteDescription.type === 'offer') {
-                    peerConnection.createAnswer()
+                if (desc.type === 'offer') {
+                    return peerConnection.createAnswer()
                         .then(answer => peerConnection.setLocalDescription(answer))
                         .then(() => {
-                            offerAnswerTextarea.value = JSON.stringify(peerConnection.localDescription);
-                            connectionInfo.textContent = 'Answer رو کپی کن و به دوستت بده.';
+                            document.getElementById('offerAnswer').value = JSON.stringify(peerConnection.localDescription);
+                            showStatus('کد پاسخ شما آماده است. آن را برای میزبان بفرستید', 'green');
                         });
                 } else {
-                    connectionInfo.textContent = 'اتصال با موفقیت برقرار شد!';
+                    showStatus('اتصال برقرار شد!', 'green');
                 }
             })
             .catch(err => {
-                connectionInfo.textContent = `خطا در تنظیم اتصال: ${err.message}`;
+                showStatus(`خطا در اتصال: ${err}`, 'red');
             });
     } catch (err) {
-        connectionInfo.textContent = `فرمت اشتباه: ${err.message}`;
+        showStatus('کد اتصال نامعتبر است', 'red');
     }
 };
 
-// همگام‌سازی دوره‌ای زمان ویدیو
-function syncVideoTime() {
-    setInterval(() => {
-        if (dataChannel?.readyState === 'open' && !video.paused) {
-            dataChannel.send(JSON.stringify(video.currentTime));
+// تنظیمات پایه اتصال Peer
+function setupPeerConnection() {
+    peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    });
+
+    // کانال داده برای هماهنگی
+    if (isHost) {
+        dataChannel = peerConnection.createDataChannel('syncChannel');
+        setupDataChannel();
+    } else {
+        peerConnection.ondatachannel = event => {
+            dataChannel = event.channel;
+            setupDataChannel();
+        };
+    }
+
+    // مدیریت ICE Candidates
+    peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+            console.log('ICE Candidate:', event.candidate);
         }
-    }, 2000);
+    };
+
+    peerConnection.onconnectionstatechange = () => {
+        showStatus(`وضعیت اتصال: ${peerConnection.connectionState}`, 'blue');
+    };
 }
 
-// رویدادهای ویدیو
+// تنظیمات کانال داده
+function setupDataChannel() {
+    dataChannel.onopen = () => {
+        showStatus('اتصال برقرار شد! هماهنگی فعال است', 'green');
+        
+        // همگام‌سازی اولیه
+        if (isHost) {
+            sendSyncData({
+                time: video.currentTime,
+                isPlaying: !video.paused
+            });
+        }
+    };
+
+    dataChannel.onmessage = event => {
+        const data = JSON.parse(event.data);
+        
+        // همگام‌سازی زمان و وضعیت پخش
+        if (Math.abs(video.currentTime - data.time) > 0.5) {
+            video.currentTime = data.time;
+        }
+        
+        if (data.isPlaying && video.paused) {
+            video.play().catch(e => console.log('Play error:', e));
+        } else if (!data.isPlaying && !video.paused) {
+            video.pause();
+        }
+    };
+
+    dataChannel.onclose = () => {
+        showStatus('اتصال قطع شد', 'red');
+    };
+}
+
+// ارسال داده‌های هماهنگی
+function sendSyncData(data) {
+    if (dataChannel && dataChannel.readyState === 'open') {
+        dataChannel.send(JSON.stringify(data));
+    }
+}
+
+// رویدادهای ویدیو برای هماهنگی
 video.addEventListener('play', () => {
-    if (dataChannel?.readyState === 'open') {
-        dataChannel.send(JSON.stringify(video.currentTime));
-    }
+    sendSyncData({
+        time: video.currentTime,
+        isPlaying: true
+    });
 });
+
 video.addEventListener('pause', () => {
-    if (dataChannel?.readyState === 'open') {
-        dataChannel.send(JSON.stringify(video.currentTime));
-    }
-})
+    sendSyncData({
+        time: video.currentTime,
+        isPlaying: false
+    });
+});
+
+video.addEventListener('seeked', () => {
+    sendSyncData({
+        time: video.currentTime,
+        isPlaying: !video.paused
+    });
+});
+
+// نمایش وضعیت
+function showStatus(message, color) {
+    connectionStatus.textContent = message;
+    connectionStatus.style.color = color;
+}
