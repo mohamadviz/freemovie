@@ -5,13 +5,46 @@ let isHost = false;
 
 // مقداردهی اولیه هنگام بارگذاری صفحه
 window.onload = function() {
+    // انتخاب المان‌ها
     video = document.getElementById('videoPlayer');
     connectionStatus = document.getElementById('connectionStatus');
     
     // مخفی کردن کنترل‌های ویدیو تا زمانی که ویدیو بارگذاری شود
     video.controls = false;
+    
+    // اضافه کردن event listenerها بعد از اطمینان از وجود المان‌ها
+    setupVideoEventListeners();
 };
 
+
+function setupVideoEventListeners() {
+    video.addEventListener('play', () => {
+        if (dataChannel?.readyState === 'open') {
+            sendSyncData({
+                time: video.currentTime,
+                isPlaying: true
+            });
+        }
+    });
+
+    video.addEventListener('pause', () => {
+        if (dataChannel?.readyState === 'open') {
+            sendSyncData({
+                time: video.currentTime,
+                isPlaying: false
+            });
+        }
+    });
+
+    video.addEventListener('seeked', () => {
+        if (dataChannel?.readyState === 'open') {
+            sendSyncData({
+                time: video.currentTime,
+                isPlaying: !video.paused
+            });
+        }
+    });
+}
 // بارگذاری ویدیو
 window.loadVideo = function() {
     const link = document.getElementById('videoLink').value.trim();
