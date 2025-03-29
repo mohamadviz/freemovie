@@ -1,71 +1,115 @@
-script.jslet video = document.getElementById('videoPlayer');
+const video = document.getElementById('videoPlayer');
+const connectionInfo = document.getElementById('connectionInfo');
+const offerAnswerTextarea = document.getElementById('offerAnswer');
+const setRemoteBtn = document.getElementById('setRemoteBtn');
 let peerConnection;
 let dataChannel;
 
-// بارگذاری ویدیو از لینک
+// بارگذاری ویدیو
 function loadVideo() {
-    let link = document.getElementById('videoLink').value.trim();
-    if (link) {
+    const link = document.getElementById('videoLink').value.trim();
+    if (!link) {
+        connectionInfo.textContent = 'لطفاً یه لینک معتبر وارد کن';
+        return;
+    }
+    try {
         video.src = link;
         video.load();
-        video.play().catch(err => alert('خطا در پخش ویدیو: ' + err.message));
-    } else {
-        alert('لطفاً یه لینک معتبر وارد کن');
+        video.play().catch(err => {
+            connectionInfo.textContent = `خطا در پخش ویدیو: ${err.message}`;
+        });
+    } catch (err) {
+        connectionInfo.textContent = `خطا در بارگذاری ویدیو: ${err.message}`;
     }
 }
 
-// تنظیم WebRTC برای هماهنگی
+// راه‌اندازی WebRTC برای همگام‌سازی
 function startSync() {
-    peerConnection = new RTCPeerConnection();
+    try {
+        peerConnection = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // سرور STUN برای اتصال بهتر
+        });
 
-    // کانال داده برای ارسال زمان ویدیو
-    dataChannel = peerConnection.createDataChannel('syncChannel');
-    dataChannel.onopen = () => {
-        document.getElementById('connectionInfo').innerHTML = 'اتصال برقرار شد! حالا زمان ویدیو رو با دوستانت هماهنگ کن.';
-        syncVideoTime();
-    };
-    dataChannel.onmessage = (event) => {
-        let time = JSON.parse(event.data);
-        video.currentTime = time; // همگام‌سازی زمان ویدیو
-    };
+        // کانال داده برای ارسال زمان ویدیو
+        dataChannel = peerConnection.createDataChannel('syncChannel');
+        dataChannel.onopen = () => {
+            connectionInfo.textContent = 'اتصال برقرار شد! حالا می‌تونی ویدیو رو هماهنگ کنی.';
+            syncVideoTime();
+        };
+        dataChannel.onmessage = (event) => {
+            const time = JSON.parse(event.data);
+            if (Math.abs(video.currentTime - time) > 0.5) { // فقط اگر اختلاف زیاد باشه
+                video.currentTime = time;
+            }
+        };
+        dataChannel.onclose = () => {
+            connectionInfo.textContent = 'اتصال بسته شد.';
+        };
 
-    // ایجاد پیشنهاد (Offer)
-    peerConnection.createOffer()
-        .then(offer => peerConnection.setLocalDescription(offer))
-        .then(() => {
-            let offerText = JSON.stringify(peerConnection.localDescription);
-            document.getElementById('connectionInfo').innerHTML = 
-                `Offer رو کپی کن و به دوستت بده:<br><textarea readonly class="w-full p-2 bg-gray-800 rounded">${offerText}</textarea>`;
-        })
-        .catch(err => alert('خطا در ایجاد Offer: ' + err.message));
+        // مدیریت ICE Candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                console.log('ICE Candidate:', event.candidate);
+            }
+        };
 
-    // دریافت ICE Candidates
-    peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-            console.log('ICE Candidate:', event.candidate);
-        }
-    };
+        // ایجاد Offer
+        peerConnection.createOffer()
+            .then(offer => peerConnection.setLocalDescription(offer))
+            .then(() => {
+                offerAnswerTextarea.value = JSON.stringify(peerConnection.localDescription);
+                offerAnswerTextarea.classList.remove('hidden');
+                setRemoteBtn.classList.remove('hidden');
+                connectionInfo.textContent = 'Offer رو کپی کن و به دوستت بده.';
+            })
+            .catch(err => {
+                connectionInfo.textContent = `خطا در ایجاد Offer: ${err.message}`;
+            });
 
-    // دریافت Answer از کاربر دیگه
-    setTimeout(() => {
-        let answer = prompt('Answer رو از دوستت بگیر و اینجا بذار:');
-        if (answer) {
-            peerConnection.setRemoteDescription(JSON.parse(answer))
-                .catch(err => alert('خطا در ست کردن Answer: ' + err.message));
-        }
-    }, 2000);
+    } catch (err) {
+        connectionInfo.textContent = `خطا در راه‌اندازی WebRTC: ${err.message}`;
+    }
 }
 
-// ارسال زمان ویدیو به صورت دوره‌ای
+// تنظیم Answer یا Offer از طرف مقابل
+function setRemoteDescription() {
+    const remoteDesc = offerAnswerTextarea.value.trim();
+    if (!remoteDesc) {
+        connectionInfo.textContent = 'لطفاً Offer یا Answer رو وارد کن';
+        return;
+    }
+    try {
+        peerConnection.setRemoteDescription(JSON.parse(remoteDesc))
+            .then(() => {
+                if (peerConnection.remoteDescription.type === 'offer') {
+                    peerConnection.createAnswer()
+                        .then(answer => peerConnection.setLocalDescription(answer))
+                        .then(() => {
+                            offerAnswerTextarea.value = JSON.stringify(peerConnection.localDescription);
+                            connectionInfo.textContent = 'Answer رو کپی کن و به دوستت بده.';
+                        });
+                } else {
+                    connectionInfo.textContent = 'اتصال با موفقیت برقرار شد!';
+                }
+            })
+            .catch(err => {
+                connectionInfo.textContent = `خطا در تنظیم اتصال: ${err.message}`;
+            });
+    } catch (err) {
+        connectionInfo.textContent = `فرمت اشتباه: ${err.message}`;
+    }
+}
+
+// همگام‌سازی دوره‌ای زمان ویدیو
 function syncVideoTime() {
     setInterval(() => {
-        if (dataChannel.readyState === 'open' && !video.paused) {
+        if (dataChannel?.readyState === 'open' && !video.paused) {
             dataChannel.send(JSON.stringify(video.currentTime));
         }
-    }, 1000); // هر ۱ ثانیه
+    }, 2000); // هر ۲ ثانیه برای کاهش بار
 }
 
-// همگام‌سازی هنگام پخش یا توقف
+// رویدادهای ویدیو
 video.addEventListener('play', () => {
     if (dataChannel?.readyState === 'open') {
         dataChannel.send(JSON.stringify(video.currentTime));

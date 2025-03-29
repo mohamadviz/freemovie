@@ -19,26 +19,30 @@
             <nav class="flex items-center space-x-4">
                 <a href="/" class="hover:text-gray-300 p-4"><i class="fas fa-home"></i></a>
             </nav>
-            <div>
-                <h1 class="text-xl font-bold">پلی‌شو</h1>
-            </div>
+            <h1 class="text-xl font-bold">پلی‌شو</h1>
         </div>
     </header>
 
     <main class="container mx-auto flex-1 py-8">
-        <div class="flex justify-center mb-8 items-center gap-4">
-            <input type="text" id="videoLink" class="w-full max-w-lg p-3 rounded-lg bg-gray-800 text-white" placeholder="لینک ویدیو رو اینجا وارد کن (مثل MP4)">
-            <button onclick="loadVideo()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                <i class="fas fa-play"></i> بارگذاری
-            </button>
-            <button onclick="startSync()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                <i class="fas fa-sync"></i> شروع هماهنگی
+        <div class="flex flex-col items-center mb-8 gap-4">
+            <input type="text" id="videoLink" class="w-full max-w-lg p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400" placeholder="لینک ویدیو رو اینجا وارد کن (مثل MP4)">
+            <div class="flex gap-4">
+                <button onclick="loadVideo()" classاب class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-play"></i> بارگذاری
+                </button>
+                <button onclick="startSync()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    <i class="fas fa-sync"></i> شروع هماهنگی
+                </button>
+            </div>
+            <textarea id="offerAnswer" class="w-full max-w-lg p-3 rounded-lg bg-gray-800 text-white hidden" placeholder="Offer یا Answer رو اینجا بذار"></textarea>
+            <button onclick="setRemoteDescription()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 hidden" id="setRemoteBtn">
+                <i class="fas fa-link"></i> اتصال
             </button>
         </div>
         <div class="flex justify-center">
             <video id="videoPlayer" controls class="max-w-full rounded-lg shadow-lg"></video>
         </div>
-        <div id="connectionInfo" class="text-center mt-4"></div>
+        <div id="connectionInfo" class="text-center mt-4 text-gray-400"></div>
     </main>
 
     <footer class="bg-gray-800 p-4 mt-auto">

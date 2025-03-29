@@ -15,3 +15,12 @@ button {
 #connectionInfo {
     color: #bbb;
 }
+
+@media (max-width: 640px) {
+    .container {
+        padding: 0 1rem;
+    }
+    video {
+        width: 100%;
+    }
+}
