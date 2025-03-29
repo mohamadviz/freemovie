@@ -30,6 +30,16 @@ button:disabled {
     resize: vertical;
 }
 
+#shareLink {
+    direction: ltr;
+    text-align: left;
+    font-family: monospace;
+}
+
+.hidden {
+    display: none;
+}
+
 @media (max-width: 640px) {
     .container {
         padding: 0 1rem;

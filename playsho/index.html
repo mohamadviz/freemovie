@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html lang="fa" class="dark">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پلی‌شو - تماشای همزمان ویدیو</title>
     <meta name="description" content="پلی‌شو - با دوستانت ویدیوها رو آنلاین و همزمان تماشا کن">
-    <meta name="keywords" content="پلی‌شو, تماشای همزمان, پخش ویدیو, کلودفلر">
-    <meta name="author" content="تیم پلی‌شو">
-    <link rel="canonical" href="https://playsho.m4tinbeigi.workers.dev/">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:,">
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col">
     <header class="bg-gray-800 p-4 shadow-md">
@@ -52,6 +48,19 @@
                             <i class="fas fa-link ml-2"></i> برقراری اتصال
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- بخش اشتراک‌گذاری -->
+            <div id="shareSection" class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow hidden">
+                <div class="flex flex-col gap-4">
+                    <div class="flex gap-3">
+                        <input type="text" id="shareLink" class="flex-1 p-3 rounded-lg bg-gray-700 text-white" readonly>
+                        <button onclick="copyShareLink()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+                            <i class="fas fa-copy ml-2"></i> کپی
+                        </button>
+                    </div>
+                    <p class="text-gray-400 text-sm">این لینک را برای دوستتان بفرستید تا به تماشای همزمان بپیوندد</p>
                 </div>
             </div>
 
