@@ -84,3 +84,33 @@ body {
 .fade-in {
     animation: fadeIn 0.5s ease-in-out;
 }
+
+/* اضافه کردن این بخش به فایل style.css */
+#inputSection.show,
+#shareSection.show,
+#videoSection.show {
+    opacity: 1;
+    transform: translateY(0);
+    display: block !important;
+}
+
+#inputSection.hidden,
+#shareSection.hidden,
+#videoSection.hidden {
+    display: none !important;
+}
+
+/* اضافه کردن انیمیشن برای انتقال نرم */
+#videoPlayer {
+    transition: all 0.3s ease;
+}
+
+/* بهبود ظاهر دکمه‌ها */
+button, a {
+    transition: all 0.2s ease;
+}
+
+button:hover, a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}

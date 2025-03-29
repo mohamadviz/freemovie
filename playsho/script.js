@@ -13,6 +13,9 @@ window.onload = function() {
     connectionStatus = document.getElementById('connectionStatus');
     video.controls = false;
 
+    // نمایش بخش ورود لینک
+    showInputSection();
+
     // بررسی پارامترهای URL
     const urlParams = new URLSearchParams(window.location.search);
     const joinParam = urlParams.get('join');
@@ -41,12 +44,15 @@ window.onload = function() {
 // نمایش بخش ویدیو
 function showVideoSection() {
     document.getElementById('inputSection').classList.add('hidden');
+    document.getElementById('shareSection').classList.add('hidden');
     document.getElementById('videoSection').classList.remove('hidden');
+    document.getElementById('videoSection').classList.add('show');
 }
 
 // نمایش بخش ورود لینک
 function showInputSection() {
     document.getElementById('inputSection').classList.remove('hidden');
+    document.getElementById('inputSection').classList.add('show');
     document.getElementById('videoSection').classList.add('hidden');
     document.getElementById('shareSection').classList.add('hidden');
 }
@@ -117,6 +123,7 @@ function setupShareSection() {
     document.getElementById('telegramShare').href = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
     
     document.getElementById('shareSection').classList.remove('hidden');
+    document.getElementById('shareSection').classList.add('show');
 }
 
 // کپی لینک اشتراک‌گذاری
@@ -185,46 +192,76 @@ function startGuestConnection() {
         .then(() => {
             const offerUrl = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}&offer=${encodeURIComponent(JSON.stringify(peerConnection.localDescription))}`;
             window.location.href = offerUrl;
+        })
+        .catch(err => {
+            console.error('Error creating offer:', err);
+            showStatus('خطا در ایجاد اتصال', 'red');
         });
 }
 
 // مدیریت پاسخ مهمان
 function handleAnswer(answerData) {
-    const answer = JSON.parse(decodeURIComponent(answerData));
-    if (peerConnection) {
-        peerConnection.setRemoteDescription(answer);
+    try {
+        const answer = JSON.parse(decodeURIComponent(answerData));
+        if (peerConnection) {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                .then(() => {
+                    showStatus('اتصال با موفقیت برقرار شد', 'green');
+                })
+                .catch(err => {
+                    console.error('Error setting remote description:', err);
+                    showStatus('خطا در برقراری اتصال', 'red');
+                });
+        }
+    } catch (err) {
+        console.error('Error parsing answer:', err);
+        showStatus('خطا در پردازش پاسخ', 'red');
     }
 }
 
 // تنظیم اتصال Peer
 function setupPeerConnection() {
-    peerConnection = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    });
+    try {
+        peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+        });
 
-    if (isHost) {
-        dataChannel = peerConnection.createDataChannel('syncChannel');
-        setupDataChannel();
-    } else {
-        peerConnection.ondatachannel = event => {
-            dataChannel = event.channel;
+        if (isHost) {
+            dataChannel = peerConnection.createDataChannel('syncChannel');
             setupDataChannel();
+        } else {
+            peerConnection.ondatachannel = event => {
+                dataChannel = event.channel;
+                setupDataChannel();
+            };
+        }
+
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                console.log('ICE Candidate:', event.candidate);
+            }
         };
+
+        peerConnection.onconnectionstatechange = () => {
+            const status = peerConnection.connectionState;
+            showStatus(`وضعیت اتصال: ${status}`, 'blue');
+            if (status === 'disconnected' || status === 'failed') {
+                setTimeout(() => window.location.reload(), 3000);
+            }
+        };
+
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log('ICE connection state:', peerConnection.iceConnectionState);
+        };
+
+    } catch (err) {
+        console.error('Error setting up peer connection:', err);
+        showStatus('خطا در راه‌اندازی اتصال', 'red');
     }
-
-    peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-            console.log('ICE Candidate:', event.candidate);
-        }
-    };
-
-    peerConnection.onconnectionstatechange = () => {
-        const status = peerConnection.connectionState;
-        showStatus(`وضعیت اتصال: ${status}`, 'blue');
-        if (status === 'disconnected' || status === 'failed') {
-            setTimeout(() => window.location.reload(), 3000);
-        }
-    };
 }
 
 // تنظیم کانال داده
@@ -242,49 +279,71 @@ function setupDataChannel() {
     };
 
     dataChannel.onmessage = event => {
-        const data = JSON.parse(event.data);
-        isSyncing = true;
-        
-        switch(data.type) {
-            case 'play':
-                video.currentTime = data.time;
-                video.play().catch(e => console.log('Play error:', e));
-                break;
-            case 'pause':
-                video.currentTime = data.time;
-                video.pause();
-                break;
-            case 'seeked':
-                video.currentTime = data.time;
-                break;
-            case 'stop':
-                video.currentTime = 0;
-                video.pause();
-                break;
-            case 'sync':
-                if (Math.abs(video.currentTime - data.time) > 0.5) {
-                    video.currentTime = data.time;
-                }
-                if (data.isPlaying && video.paused) {
+        try {
+            const data = JSON.parse(event.data);
+            isSyncing = true;
+            
+            switch(data.type) {
+                case 'play':
+                    if (Math.abs(video.currentTime - data.time) > 0.5) {
+                        video.currentTime = data.time;
+                    }
                     video.play().catch(e => console.log('Play error:', e));
-                } else if (!data.isPlaying && !video.paused) {
+                    break;
+                case 'pause':
+                    if (Math.abs(video.currentTime - data.time) > 0.5) {
+                        video.currentTime = data.time;
+                    }
                     video.pause();
-                }
-                break;
+                    break;
+                case 'seeked':
+                    video.currentTime = data.time;
+                    if (data.isPlaying && video.paused) {
+                        video.play().catch(e => console.log('Play error:', e));
+                    } else if (!data.isPlaying && !video.paused) {
+                        video.pause();
+                    }
+                    break;
+                case 'stop':
+                    video.currentTime = 0;
+                    video.pause();
+                    break;
+                case 'sync':
+                    if (Math.abs(video.currentTime - data.time) > 0.5) {
+                        video.currentTime = data.time;
+                    }
+                    if (data.isPlaying && video.paused) {
+                        video.play().catch(e => console.log('Play error:', e));
+                    } else if (!data.isPlaying && !video.paused) {
+                        video.pause();
+                    }
+                    break;
+            }
+            
+            setTimeout(() => { isSyncing = false; }, 100);
+        } catch (err) {
+            console.error('Error processing message:', err);
         }
-        
-        setTimeout(() => { isSyncing = false; }, 100);
     };
 
     dataChannel.onclose = () => {
         showStatus('اتصال قطع شد', 'red');
+    };
+
+    dataChannel.onerror = (err) => {
+        console.error('Data channel error:', err);
+        showStatus('خطا در کانال ارتباطی', 'red');
     };
 }
 
 // ارسال داده همگام‌سازی
 function sendSyncData(data) {
     if (dataChannel && dataChannel.readyState === 'open') {
-        dataChannel.send(JSON.stringify(data));
+        try {
+            dataChannel.send(JSON.stringify(data));
+        } catch (err) {
+            console.error('Error sending sync data:', err);
+        }
     }
 }
 
