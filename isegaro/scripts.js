@@ -71,7 +71,7 @@ const addNewApiKeyInput = (value = '') => {
 };
 
 const updateApiKeys = () => {
-    stateahan.apiKeys = Array.from(document.querySelectorAll('.api-key-input'))
+    state.apiKeys = Array.from(document.querySelectorAll('.api-key-input'))
         .map(input => input.value.trim())
         .filter(key => key !== '');
     localStorage.setItem('translatorApiKeys', JSON.stringify(state.apiKeys));
@@ -553,7 +553,8 @@ elements.translateButton.addEventListener('click', async () => {
                 .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                 .join('\n\n');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
+            const originalFileName = elements.fileNameDisplay.textContent.replace('.srt', ''); // حذف .srt از نام اصلی
+            const fileName = `${originalFileName}_${timestamp}-FreeMovie.srt`; // نام فایل اصلی + زمان + FreeMovie
             await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
         }
     } finally {
@@ -597,7 +598,8 @@ elements.continueButton.addEventListener('click', async () => {
                     .map(block => `${block.index}\n${block.startTime} --> ${block.endTime}\n${block.text}`)
                     .join('\n\n');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
+                const originalFileName = elements.fileNameDisplay.textContent.replace('.srt', ''); // حذف .srt از نام اصلی
+                const fileName = `${originalFileName}_${timestamp}-FreeMovie.srt`; // نام فایل اصلی + زمان + FreeMovie
                 await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
             }
         } finally {
@@ -645,7 +647,8 @@ elements.saveButton.addEventListener('click', async () => {
         const a = document.createElement('a');
         a.href = url;
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `زیرنویس_ترجمه‌شده_${timestamp}-FreeMovie.srt`; // اضافه کردن -FreeMovie
+        const originalFileName = elements.fileNameDisplay.textContent.replace('.srt', ''); // حذف .srt از نام اصلی
+        const fileName = `${originalFileName}_${timestamp}-FreeMovie.srt`; // نام فایل اصلی + زمان + FreeMovie
         a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
