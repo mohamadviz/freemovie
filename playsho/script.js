@@ -20,7 +20,7 @@ const ICE_CONFIG = {
 function decodeURLParams() {
     const urlParams = new URLSearchParams(location.search);
     currentSession.id = urlParams.get('join');
-    currentSession.videoUrl = decodeURIComponent(urlParams.get('video') || '';
+    currentSession.videoUrl = decodeURIComponent(urlParams.get('video') || ''); // اصلاح شد
 }
 
 function isValidVideoUrl(url) {
