@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fa" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پلی‌شو - تماشای همزمان ویدیو</title>
+    <meta name="description" content="پلی‌شو - با دوستانت ویدیوها رو آنلاین و همزمان تماشا کن">
+    <meta name="keywords" content="پلی‌شو, تماشای همزمان, پخش ویدیو, کلودفلر">
+    <meta name="author" content="تیم پلی‌شو">
+    <link rel="canonical" href="https://playsho.m4tinbeigi.workers.dev/">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <header class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <nav class="flex items-center space-x-4">
+                <a href="/" class="hover:text-gray-300 p-4"><i class="fas fa-home"></i></a>
+            </nav>
+            <div>
+                <h1 class="text-xl font-bold">پلی‌شو</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto flex-1 py-8">
+        <div class="flex justify-center mb-8 items-center gap-4">
+            <input type="text" id="videoLink" class="w-full max-w-lg p-3 rounded-lg bg-gray-800 text-white" placeholder="لینک ویدیو رو اینجا وارد کن (مثل MP4)">
+            <button onclick="loadVideo()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <i class="fas fa-play"></i> بارگذاری
+            </button>
+            <button onclick="startSync()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                <i class="fas fa-sync"></i> شروع هماهنگی
+            </button>
+        </div>
+        <div class="flex justify-center">
+            <video id="videoPlayer" controls class="max-w-full rounded-lg shadow-lg"></video>
+        </div>
+        <div id="connectionInfo" class="text-center mt-4"></div>
+    </main>
+
+    <footer class="bg-gray-800 p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>پلی‌شو - تماشای رایگان و همزمان ویدیو</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

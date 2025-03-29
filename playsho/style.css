@@ -1,0 +1,17 @@
+body {
+    font-family: "Vazir", sans-serif;
+    direction: rtl;
+}
+
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+button {
+    transition: background-color 0.3s;
+}
+
+#connectionInfo {
+    color: #bbb;
+}
