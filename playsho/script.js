@@ -41,13 +41,12 @@ async function initializeVideoPlayer() {
     }
 
     try {
-        // استفاده از CORS proxy برای تست
         const proxyUrl = 'https://corsproxy.io/?';
         video.src = proxyUrl + encodeURIComponent(currentSession.videoUrl);
         
         await video.play();
         video.controls = true;
-        setupVideoSync(video);
+        setupVideoSync(video); // این تابع نیاز به تعریف دارد
         showSection('videoSection');
         
         if (!currentSession.id) {
@@ -62,6 +61,25 @@ async function initializeVideoPlayer() {
     }
 }
 
+// اضافه کردن تابع گم شده
+function setupVideoSync(videoElement) {
+    const syncEvents = ['play', 'pause', 'seeked', 'timeupdate'];
+    
+    syncEvents.forEach(event => {
+        videoElement.addEventListener(event, () => {
+            if (!isHost || !dataChannel || dataChannel.readyState !== 'open') return;
+            
+            const syncData = {
+                type: event,
+                time: videoElement.currentTime,
+                timestamp: Date.now(),
+                isPlaying: !videoElement.paused
+            };
+            
+            sendSyncData(syncData);
+        });
+    });
+}
 function setupPeerConnection() {
     peerConnection = new RTCPeerConnection(ICE_CONFIG);
 
