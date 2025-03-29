@@ -20,13 +20,14 @@ const ICE_CONFIG = {
 function decodeURLParams() {
     const urlParams = new URLSearchParams(location.search);
     currentSession.id = urlParams.get('join');
-    currentSession.videoUrl = decodeURIComponent(urlParams.get('video') || '');
+    currentSession.videoUrl = decodeURIComponent(urlParams.get('video') || '';
 }
 
 function isValidVideoUrl(url) {
     try {
         new URL(url);
-        return /\.(mp4|webm|ogg|m3u8)(\?.*)?$/i.test(url);
+        return /^(https?|ftp):\/\/.+/i.test(url) && 
+               /\.(mp4|webm|ogg|m3u8|mkv|avi|mov)(\?.*)?$/i.test(url);
     } catch {
         return false;
     }
@@ -41,12 +42,10 @@ async function initializeVideoPlayer() {
     }
 
     try {
-        const proxyUrl = 'https://corsproxy.io/?';
-        video.src = proxyUrl + encodeURIComponent(currentSession.videoUrl);
-        
+        video.src = currentSession.videoUrl;
         await video.play();
         video.controls = true;
-        setupVideoSync(video); // این تابع نیاز به تعریف دارد
+        setupVideoSync(video);
         showSection('videoSection');
         
         if (!currentSession.id) {
@@ -56,12 +55,11 @@ async function initializeVideoPlayer() {
         }
     } catch (err) {
         console.error('خطا:', err);
-        showStatus('خطا در بارگذاری ویدیو', 'red');
+        showStatus('خطا در بارگذاری ویدیو - مطمئن شوید لینک مستقیم و CORS فعال است', 'red');
         showSection('inputSection');
     }
 }
 
-// اضافه کردن تابع گم شده
 function setupVideoSync(videoElement) {
     const syncEvents = ['play', 'pause', 'seeked', 'timeupdate'];
     
@@ -80,6 +78,7 @@ function setupVideoSync(videoElement) {
         });
     });
 }
+
 function setupPeerConnection() {
     peerConnection = new RTCPeerConnection(ICE_CONFIG);
 
@@ -223,3 +222,10 @@ window.showInputSection = () => {
     history.replaceState(null, '', location.pathname);
     location.reload();
 };
+
+// تابع ارسال داده همگام‌سازی
+function sendSyncData(data) {
+    if (dataChannel.readyState === 'open') {
+        dataChannel.send(JSON.stringify(data));
+    }
+}
