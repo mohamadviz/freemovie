@@ -1,8 +1,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const tokenInput = document.getElementById('omdb-token');
-    const saveButton = document.getElementById('save-token');
-    const clearButton = document.getElementById('clear-token');
+    const saveButton = document.getElementById('save-tokens'); // تغییر به save-tokens
+    const clearButton = document.getElementById('clear-tokens'); // تغییر به clear-tokens
     const statusMessage = document.getElementById('status-message');
 
     // بارگذاری توکن ذخیره‌شده
