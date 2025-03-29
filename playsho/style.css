@@ -10,47 +10,14 @@ video {
     background: #000;
 }
 
-button {
-    transition: all 0.3s ease;
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
 #connectionStatus {
     font-size: 0.9rem;
     padding: 0.5rem;
     border-radius: 0.25rem;
 }
 
-#offerAnswer {
-    min-height: 100px;
-    resize: vertical;
-}
-
-#shareLink {
-    direction: ltr;
-    text-align: left;
-    font-family: monospace;
-}
-
-.hidden {
-    display: none;
-}
-
 @media (max-width: 640px) {
     .container {
         padding: 0 1rem;
-    }
-    
-    .flex-col {
-        gap: 1rem;
-    }
-    
-    button {
-        padding: 0.5rem;
-        font-size: 0.9rem;
     }
 }
