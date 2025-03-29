@@ -4,6 +4,7 @@ let peerConnection, dataChannel;
 let isHost = false;
 let sessionId = null;
 let videoUrl = null;
+let isSyncing = false;
 
 // مقداردهی اولیه هنگام بارگذاری صفحه
 window.onload = function() {
@@ -86,6 +87,7 @@ function loadVideo(callback) {
     
     video.onloadeddata = () => {
         video.controls = true;
+        setupVideoEventListeners();
         showStatus('ویدیو آماده پخش است', 'green');
         if (callback) callback();
     };
@@ -93,6 +95,53 @@ function loadVideo(callback) {
     video.onerror = () => {
         showStatus('خطا در بارگذاری ویدیو', 'red');
     };
+}
+
+function setupVideoEventListeners() {
+    // رویداد پخش
+    video.addEventListener('play', () => {
+        if (!isSyncing && dataChannel?.readyState === 'open') {
+            sendSyncData({
+                type: 'play',
+                time: video.currentTime
+            });
+        }
+    });
+
+    // رویداد توقف
+    video.addEventListener('pause', () => {
+        if (!isSyncing && dataChannel?.readyState === 'open') {
+            sendSyncData({
+                type: 'pause',
+                time: video.currentTime
+            });
+        }
+    });
+
+    // رویداد جستجو
+    video.addEventListener('seeked', () => {
+        if (!isSyncing && dataChannel?.readyState === 'open') {
+            sendSyncData({
+                type: 'seek',
+                time: video.currentTime
+            });
+        }
+    });
+
+    // تشخیص توقف کامل
+    let lastTime = -1;
+    const checkStop = () => {
+        if (video.currentTime === lastTime && video.currentTime === 0 && !video.paused) {
+            if (dataChannel?.readyState === 'open') {
+                sendSyncData({
+                    type: 'stop',
+                    time: 0
+                });
+            }
+        }
+        lastTime = video.currentTime;
+    };
+    setInterval(checkStop, 300);
 }
 
 function startGuestConnection() {
@@ -147,18 +196,37 @@ function setupDataChannel() {
 
     dataChannel.onmessage = event => {
         const data = JSON.parse(event.data);
+        isSyncing = true;
         
-        if (data.type === 'sync') {
-            if (Math.abs(video.currentTime - data.time) > 0.5) {
+        switch(data.type) {
+            case 'play':
                 video.currentTime = data.time;
-            }
-            
-            if (data.isPlaying && video.paused) {
                 video.play().catch(e => console.log('Play error:', e));
-            } else if (!data.isPlaying && !video.paused) {
+                break;
+            case 'pause':
+                video.currentTime = data.time;
                 video.pause();
-            }
+                break;
+            case 'seek':
+                video.currentTime = data.time;
+                break;
+            case 'stop':
+                video.currentTime = 0;
+                video.pause();
+                break;
+            case 'sync':
+                if (Math.abs(video.currentTime - data.time) > 0.5) {
+                    video.currentTime = data.time;
+                }
+                if (data.isPlaying && video.paused) {
+                    video.play().catch(e => console.log('Play error:', e));
+                } else if (!data.isPlaying && !video.paused) {
+                    video.pause();
+                }
+                break;
         }
+        
+        setTimeout(() => { isSyncing = false; }, 100);
     };
 
     dataChannel.onclose = () => {
