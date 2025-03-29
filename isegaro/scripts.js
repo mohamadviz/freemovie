@@ -251,7 +251,7 @@ const getBlockContext = index => {
     return JSON.stringify(contextArray);
 };
 
-// تشخیص زبان با استفاده از franc
+// تشخیص زبان با استفاده از franc (فرض می‌کنیم این کتابخانه در دسترس است)
 const detectLanguage = text => {
     try {
         return franc(text, { minLength: 3 }) || 'und'; // 'und' اگر نامشخص باشد
@@ -263,7 +263,7 @@ const detectLanguage = text => {
 // تنظیم طول ترجمه بر اساس زمان نمایش
 const adjustTranslationLength = (translatedText, startTime, endTime) => {
     const duration = timeToSeconds(endTime) - timeToSeconds(startTime);
-    const maxCharsPerSecond = 15; // حداکثر 15 کاراکتر در ثانیه برای خوانایی
+    const maxCharsPerSecond = 15;
     const maxLength = Math.floor(duration * maxCharsPerSecond);
 
     if (translatedText.length > maxLength) {
@@ -284,13 +284,8 @@ const adjustTranslationLength = (translatedText, startTime, endTime) => {
 // پس‌پردازش ترجمه
 const postProcessTranslation = (translatedText, originalText, startTime, endTime) => {
     let result = translatedText.trim();
-
-    // تنظیم طول بر اساس زمان نمایش
     result = adjustTranslationLength(result, startTime, endTime);
-
-    // حذف تکرارها و فاصله‌های اضافی
     result = result.replace(/\s+/g, ' ').trim();
-
     return result;
 };
 
@@ -343,7 +338,8 @@ Example:
 
         const apiKey = state.apiKeys[state.currentApiKeyIndex];
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            const workerUrl = `https://subtitle-translator-proxy.m4tinbeigi.workers.dev/?key=${apiKey}&model=${model}`;
+            const response = await fetch(workerUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: improvedPrompt }] }] })
@@ -356,7 +352,8 @@ Example:
                     if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
                     continue;
                 }
-                throw new Error(`خطای API: ${response.status}`);
+                const errorText = await response.text();
+                throw new Error(`خطای Worker: ${response.status} - ${errorText}`);
             }
 
             const data = await response.json();
@@ -373,11 +370,11 @@ Example:
                 continue;
             }
 
-            // اعمال پس‌پردازش با زمان‌بندی
             translatedText = postProcessTranslation(translatedText, text, state.subtitleBlocks[blockIndex].startTime, state.subtitleBlocks[blockIndex].endTime);
             return translatedText;
         } catch (error) {
             console.error(`خطا با کلید API شماره ${state.currentApiKeyIndex + 1}:`, error);
+            showFlashMessage(`خطا در ترجمه: ${error.message}`, 'error');
             state.currentApiKeyIndex++;
             if (state.currentApiKeyIndex >= state.apiKeys.length) allKeysLimited = true;
             continue;
@@ -385,45 +382,9 @@ Example:
     }
 };
 
-// ذخیره در گوگل درایو
+// ذخیره در گوگل درایو (این بخش غیرفعال است چون نیاز به سرور دارد)
 const uploadToGoogleDrive = async (content, fileName) => {
-    // توجه: این کد نیاز به تنظیم Google Drive API و OAuth 2.0 دارد
-    const accessToken = 'YOUR_GOOGLE_DRIVE_ACCESS_TOKEN'; // باید از طریق OAuth دریافت شود
-    const boundary = '-------314159265358979323846';
-    const delimiter = `\r\n--${boundary}\r\n`;
-    const closeDelimiter = `\r\n--${boundary}--`;
-
-    const metadata = {
-        name: fileName,
-        mimeType: 'text/plain'
-    };
-
-    const multipartRequestBody =
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        JSON.stringify(metadata) +
-        delimiter +
-        'Content-Type: text/plain\r\n\r\n' +
-        content +
-        closeDelimiter;
-
-    try {
-        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': `multipart/related; boundary="${boundary}"`
-            },
-            body: multipartRequestBody
-        });
-
-        if (!response.ok) throw new Error('خطا در آپلود به گوگل درایو');
-        const data = await response.json();
-        showFlashMessage(`فایل با موفقیت در گوگل درایو آپلود شد. ID: ${data.id}`, 'success');
-    } catch (error) {
-        console.error('خطای آپلود در گوگل درایو:', error);
-        showFlashMessage('خطا در آپلود به گوگل درایو: ' + error.message, 'error');
-    }
+    showFlashMessage('آپلود به گوگل درایو در این نسخه غیرفعال است', 'error');
 };
 
 const retranslateBlock = async index => {
@@ -536,9 +497,7 @@ elements.fileInput.addEventListener('change', event => {
         const reader = new FileReader();
         reader.onload = e => {
             const content = e.target.result;
-            console.log('محتوای فایل SRT:', content); // دیباگ
             state.subtitleBlocks = parseSRT(content);
-            console.log('بلوک‌های پارس‌شده:', state.subtitleBlocks); // دیباگ
             if (state.subtitleBlocks.length > 0) {
                 renderSubtitles(elements.originalSubtitleContainer, state.subtitleBlocks, false);
                 if (!loadProgress()) {
@@ -595,7 +554,7 @@ elements.translateButton.addEventListener('click', async () => {
                 .join('\n\n');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
-            await uploadToGoogleDrive(content, fileName);
+            await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
         }
     } finally {
         if (!state.isTranslating) {
@@ -639,7 +598,7 @@ elements.continueButton.addEventListener('click', async () => {
                     .join('\n\n');
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 const fileName = `زیرنویس_ترجمه‌شده_${timestamp}.srt`;
-                await uploadToGoogleDrive(content, fileName);
+                await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
             }
         } finally {
             if (!state.isTranslating) {
@@ -691,9 +650,7 @@ elements.saveButton.addEventListener('click', async () => {
         a.click();
         URL.revokeObjectURL(url);
 
-        // آپلود به گوگل درایو
-        await uploadToGoogleDrive(content, fileName);
-
+        await uploadToGoogleDrive(content, fileName); // غیرفعال در این نسخه
         showFlashMessage('زیرنویس‌های ترجمه‌شده با موفقیت ذخیره شدند!');
     } catch (error) {
         console.error('خطا در ذخیره زیرنویس‌ها:', error);
