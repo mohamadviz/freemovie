@@ -2,7 +2,7 @@
 body {
     font-family: "Vazir", sans-serif;
     direction: rtl;
-    background: #111;
+    background: #111827;
 }
 
 #videoPlayer {
@@ -35,5 +35,10 @@ body {
     
     header h1 {
         font-size: 1.1rem;
+    }
+    
+    #videoLink {
+        font-size: 0.9rem;
+        padding: 0.75rem;
     }
 }
