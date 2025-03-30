@@ -91,8 +91,6 @@ async function getCachedOrFetchPoster(imdbId, itemTitle) {
     }
 }
 
-
-
 function showLoading() {
     if (document.getElementById('loading-overlay')) return;
     const loadingHtml = `
@@ -116,7 +114,7 @@ function hideLoading() {
 /**
  * Creates the HTML string for a single result card.
  * Expects item object to have `posterUrl` pre-fetched.
- * @param {object} item - The movie or TV item object including `posterUrl`.
+ * @param {object} item - The movie or TV item object.
  * @param {'movie' | 'tv'} itemType - The type of the item.
  * @returns {string} - The HTML string for the result card.
  */
@@ -125,20 +123,16 @@ function createResultCard(item, itemType) {
     const title = itemType === 'movie' ? (item.title || 'نامشخص') : (item.name || 'نامشخص');
     const date = itemType === 'movie' ? item.release_date : item.first_air_date;
     const year = date ? date.substring(0, 4) : 'نامشخص';
-    // Use the pre-fetched posterUrl
-    const posterUrl = item.posterUrl || defaultPoster;
-    const detailPageUrl = itemType === 'movie' ? `../movie/index.html?id=${id}` : `../series/index.html?id=${id}`;
     const encodedTitle = title.replace(/"/g, '&quot;');
 
-    // Improved card layout (similar to previous)
     return `
-         <div class="group relative overflow-hidden rounded-lg shadow-lg bg-gray-800">
-             <img src="${posterUrl}" alt="پوستر ${encodedTitle}" class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" onerror="this.onerror=null; this.src='${defaultPoster}';">
+         <div class="group relative overflow-hidden rounded-lg shadow-lg bg-gray-800" data-item-id="${id}">
+             <img src="${defaultPoster}" alt="پوستر ${encodedTitle}" class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" onerror="this.onerror=null; this.src='${defaultPoster}';">
              <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
              <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end items-center text-center p-3">
                  <h3 class="text-base sm:text-lg font-bold text-white mb-1">${title}</h3>
                  <p class="text-sm text-gray-300 mb-2">${year}</p>
-                 <a href="${detailPageUrl}" class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors z-50">
+                 <a href="${itemType === 'movie' ? `../movie/index.html?id=${id}` : `../series/index.html?id=${id}`}" class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors z-50">
                      مشاهده جزئیات
                  </a>
              </div>
@@ -151,10 +145,9 @@ function createResultCard(item, itemType) {
 }
 
 /**
- * Displays results or "not found" message.
- * (Same logic as before, expects items with posterUrl)
+ * Displays initial results.
  */
-function displayResults(container, sectionElement, titleElement, items, itemType, query, notFoundMessage) {
+function displayInitialResults(container, sectionElement, titleElement, items, itemType, query, notFoundMessage) {
     titleElement.textContent = `نتایج جستجو ${itemType === 'movie' ? 'فیلم' : 'سریال'} برای "${query}"`;
 
     if (items && items.length > 0) {
@@ -167,61 +160,40 @@ function displayResults(container, sectionElement, titleElement, items, itemType
     }
 }
 
-// --- Main Search Function ---
-
 /**
- * Fetches media data including posters concurrently.
- * @param {Array} items - Array of movie or TV items from TMDb search.
- * @param {'movie' | 'tv'} itemType - Type of items.
- * @returns {Promise<Array>} - Promise resolving to an array of items with posterUrl added.
+ * Fetches the poster for a single item and updates the DOM.
+ * @param {object} item - The movie or TV item object.
+ * @param {'movie' | 'tv'} itemType - The type of the item.
  */
-async function fetchPostersForItems(items, itemType) {
-    const posterPromises = items.map(async (item) => {
-        const itemId = item.id;
-        const itemTitle = itemType === 'movie' ? item.title : item.name;
-        const externalIdsUrl = `https://api.themoviedb.org/3/${itemType}/${itemId}/external_ids?api_key=${tmdbApiKey}`;
-        let imdbId = null;
-        let posterUrl = defaultPoster; // Default assume
+async function fetchAndSetPoster(item, itemType) {
+    const itemId = item.id;
+    const itemTitle = itemType === 'movie' ? item.title : item.name;
+    const externalIdsUrl = `https://api.themoviedb.org/3/${itemType}/${itemId}/external_ids?api_key=${tmdbApiKey}`;
+    let imdbId = null;
 
-        try {
-            const response = await fetch(externalIdsUrl);
-            if (response.ok) {
-                const idsData = await response.json();
-                imdbId = idsData.imdb_id;
-            } else {
-                console.warn(`Failed to fetch external IDs for ${itemType} ${itemId}: ${response.status}`);
-            }
-
-            // Regardless of external ID fetch success, try getting poster (if imdbId found)
-            if (imdbId) {
-                posterUrl = await getCachedOrFetchPoster(imdbId, itemTitle);
-            } else {
-                // If no imdb_id, maybe use TMDb poster as fallback?
-                if (item.poster_path) {
-                    posterUrl = `${baseImageUrl}${item.poster_path}`;
-                    console.log(`Using TMDb poster as fallback for ${itemTitle}`);
-                } else {
-                    posterUrl = defaultPoster; // Stick to default if no TMDb poster either
-                }
-            }
-
-        } catch (error) {
-            console.error(`Error processing poster for ${itemType} ${itemTitle} (ID: ${itemId}):`, error);
-            posterUrl = defaultPoster; // Ensure default on error
+    try {
+        const response = await fetch(externalIdsUrl);
+        if (response.ok) {
+            const idsData = await response.json();
+            imdbId = idsData.imdb_id;
+        } else {
+            console.warn(`Failed to fetch external IDs for ${itemType} ${itemId}: ${response.status}`);
+            return; // If no external IDs, can't fetch from OMDB
         }
 
-        return { ...item, posterUrl }; // Return original item data + posterUrl
-    });
+        if (imdbId) {
+            const posterUrl = await getCachedOrFetchPoster(imdbId, itemTitle);
+            const imgElement = document.querySelector(`div[data-item-id="${itemId}"] img`);
+            if (imgElement) {
+                imgElement.src = posterUrl;
+            }
+        } else {
+            console.warn(`No IMDb ID found for ${itemTitle} (ID: ${itemId}), using default poster.`);
+            // Default poster is already set, no need to change
+        }
 
-    // Wait for all poster fetches (or cache lookups) to complete
-    // Use allSettled if you want to continue even if some fetches fail
-    try {
-        const itemsWithPosters = await Promise.all(posterPromises);
-        return itemsWithPosters;
-    } catch(error) {
-        console.error("Error during batch poster fetching:", error);
-        // Fallback: return original items without posters or with defaults
-        return items.map(item => ({ ...item, posterUrl: defaultPoster }));
+    } catch (error) {
+        console.error(`Error fetching and setting poster for ${itemType} ${itemTitle} (ID: ${itemId}):`, error);
     }
 }
 
@@ -242,56 +214,36 @@ async function searchMedia(query, searchType) {
     tvSection.classList.add('hidden');
 
     const encodedQuery = encodeURIComponent(cleanedQuery);
-    const baseSearchUrl = 'https://api.themoviedb.org/3/search';
-    const commonParams = `api_key=${tmdbApiKey}&language=${language}&query=${encodedQuery}`;
-    const movieSearchUrl = `${baseSearchUrl}/movie?${commonParams}`;
-    const tvSearchUrl = `${baseSearchUrl}/tv?${commonParams}`;
-
-    let promisesToFetch = [];
-    if (searchType === 'movie' || searchType === 'all') {
-        promisesToFetch.push(fetch(movieSearchUrl).then(res => res.ok ? res.json() : Promise.reject(`خطای API فیلم: ${res.status}`)));
-    }
-    if (searchType === 'tv' || searchType === 'all') {
-        promisesToFetch.push(fetch(tvSearchUrl).then(res => res.ok ? res.json() : Promise.reject(`خطای API سریال: ${res.status}`)));
-    }
+    const searchMultiUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&language=${language}&query=${encodedQuery}`;
 
     try {
-        const initialResults = await Promise.all(promisesToFetch);
-
-        let moviesRaw = [];
-        let tvSeriesRaw = [];
-        let resultIndex = 0;
-        if (searchType === 'movie' || searchType === 'all') {
-            moviesRaw = initialResults[resultIndex]?.results || [];
-            resultIndex++;
+        const response = await fetch(searchMultiUrl);
+        if (!response.ok) {
+            throw new Error(`خطای API: ${response.status}`);
         }
-        if (searchType === 'tv' || searchType === 'all') {
-            tvSeriesRaw = initialResults[resultIndex]?.results || [];
-        }
+        const data = await response.json();
+        const allResults = data.results || [];
 
-        // --- Fetch Posters Concurrently ---
         let movieItems = [];
         let tvItems = [];
-        let posterFetchPromises = [];
 
-        if (moviesRaw.length > 0) {
-            posterFetchPromises.push(fetchPostersForItems(moviesRaw, 'movie').then(results => movieItems = results));
-        }
-        if (tvSeriesRaw.length > 0) {
-            posterFetchPromises.push(fetchPostersForItems(tvSeriesRaw, 'tv').then(results => tvItems = results));
-        }
-
-        // Wait for all poster fetching batches to complete
-        await Promise.all(posterFetchPromises);
-        // --- End Poster Fetching ---
-
-
-        // Now render using the data with posters
         if (searchType === 'movie' || searchType === 'all') {
-            displayResults(movieResultsContainer, movieSection, movieTitleElement, movieItems, 'movie', cleanedQuery, 'فیلمی با این مشخصات یافت نشد.');
+            movieItems = allResults.filter(item => item.media_type === 'movie');
         }
         if (searchType === 'tv' || searchType === 'all') {
-            displayResults(tvResultsContainer, tvSection, tvTitleElement, tvItems, 'tv', cleanedQuery, 'سریالی با این مشخصات یافت نشد.');
+            tvItems = allResults.filter(item => item.media_type === 'tv');
+        }
+
+        // Display initial results with default posters
+        if (searchType === 'movie' || searchType === 'all') {
+            displayInitialResults(movieResultsContainer, movieSection, movieTitleElement, movieItems, 'movie', cleanedQuery, 'فیلمی با این مشخصات یافت نشد.');
+            // Fetch and set posters asynchronously
+            movieItems.forEach(movie => fetchAndSetPoster(movie, 'movie'));
+        }
+        if (searchType === 'tv' || searchType === 'all') {
+            displayInitialResults(tvResultsContainer, tvSection, tvTitleElement, tvItems, 'tv', cleanedQuery, 'سریالی با این مشخصات یافت نشد.');
+            // Fetch and set posters asynchronously
+            tvItems.forEach(tv => fetchAndSetPoster(tv, 'tv'));
         }
 
         if (searchType === 'all' && movieItems.length === 0 && tvItems.length === 0) {
