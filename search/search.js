@@ -1,253 +1,343 @@
 // search.js
-const apiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // TMDb API key
-const language = 'fa-IR'; // Language set to Persian (Iran)
-const baseImageUrl = 'https://image.tmdb.org/t/p/w500'; // TMDb base image URL
-const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png'; // Default poster fallback
 
-let apiKeySwitcher; // Global variable to hold the switcher instance
+// --- Configuration ---
+const tmdbApiKey = '1dc4cbf81f0accf4fa108820d551dafc'; // TMDb API key
+const language = 'fa-IR';
+const baseImageUrl = 'https://image.tmdb.org/t/p/w500'; // Base URL for TMDb images ( fallback if OMDB fails )
+const defaultPoster = 'https://m4tinbeigi-official.github.io/freemovie/images/default-freemovie.png';
+const minQueryLength = 3;
 
-// تابع برای دریافت یا ذخیره تصویر از/در کش با استفاده از localStorage
-function getCachedImage(id, fetchFunction) {
-    const cachedImage = localStorage.getItem(`image_${id}`);
-    if (cachedImage && cachedImage !== defaultPoster) { // جلوگیری از استفاده کش برای تصویر پیش‌فرض
-        console.log(`تصویر کش‌شده برای شناسه ${id} از Local Storage بارگذاری شد`);
+// --- Globals ---
+let apiKeySwitcher; // Will hold the instance for OMDB key switching
+
+// --- DOM Element References ---
+const searchInput = document.getElementById('search');
+const searchButton = document.getElementById('search-button');
+const searchTypeSelect = document.getElementById('search-type');
+const movieSection = document.getElementById('movie-results').closest('.search-column');
+const tvSection = document.getElementById('tv-results').closest('.search-column');
+const movieResultsContainer = document.getElementById('movie-results');
+const tvResultsContainer = document.getElementById('tv-results');
+const movieTitleElement = document.getElementById('movie-title');
+const tvTitleElement = document.getElementById('tv-title');
+
+// --- OMDB Poster Caching & Fetching ---
+
+/**
+ * Initializes the API key switcher for OMDB.
+ * Assumes `loadApiKeys` function is defined elsewhere and returns the switcher instance.
+ */
+async function initializeSwitcher() {
+    try {
+        if (typeof loadApiKeys === 'function') {
+            apiKeySwitcher = await loadApiKeys();
+            console.log("API Key Switcher for OMDB initialized.");
+        } else {
+            console.warn('loadApiKeys function is not defined. OMDB poster fetching may fail.');
+            // Provide a fallback mechanism or default key if needed
+            apiKeySwitcher = {
+                fetchWithKeySwitch: async (urlBuilder) => {
+                    console.warn("Using fallback fetch: No API key switcher.");
+                    throw new Error("API Key Switcher not available."); // Or return default data
+                }
+            };
+        }
+    } catch (error) {
+        console.error("Failed to initialize API Key Switcher:", error);
+        // Handle initialization failure, maybe disable OMDB fetching
+        apiKeySwitcher = null; // Indicate failure
+    }
+}
+
+
+/**
+ * Gets an image URL from cache or fetches it from OMDB via apiKeySwitcher.
+ * @param {string} imdbId - The IMDb ID of the movie/show.
+ * @param {string} itemTitle - Title for logging purposes.
+ * @returns {Promise<string>} - A promise resolving to the poster URL (or default).
+ */
+async function getCachedOrFetchPoster(imdbId, itemTitle) {
+    if (!imdbId) {
+        console.warn(`No IMDb ID provided for ${itemTitle}, using default poster.`);
+        return Promise.resolve(defaultPoster);
+    }
+    if (!apiKeySwitcher) {
+        console.warn(`API Key Switcher not available for ${itemTitle}, using default poster.`);
+        return Promise.resolve(defaultPoster);
+    }
+
+    const cacheKey = `omdb_poster_${imdbId}`;
+    const cachedImage = localStorage.getItem(cacheKey);
+
+    if (cachedImage && cachedImage !== defaultPoster) {
         return Promise.resolve(cachedImage);
     }
-    return fetchFunction().then(poster => {
-        if (poster !== defaultPoster) { // فقط پوسترهای غیرپیش‌فرض کش می‌شن
-            localStorage.setItem(`image_${id}`, poster);
-            console.log(`تصویر برای شناسه ${id} در Local Storage ذخیره شد`);
-        }
-        return poster;
-    });
+
+    try {
+        // Use the apiKeySwitcher to handle fetching and key rotation
+        const omdbData = await apiKeySwitcher.fetchWithKeySwitch(
+            (key) => `https://www.omdbapi.com/?i=${imdbId}&apikey=${key}`
+        );
+
+        const posterUrl = (omdbData && omdbData.Poster && omdbData.Poster !== 'N/A') ? omdbData.Poster : defaultPoster;
+
+        localStorage.setItem(cacheKey, posterUrl);
+        return posterUrl;
+
+    } catch (error) {
+        console.error(`Error fetching OMDB poster for ${itemTitle} (IMDb: ${imdbId}):`, error.message);
+        // Don't cache error state, return default poster for this attempt
+        return defaultPoster;
+    }
 }
 
-// Initialize the API key switcher
-async function initializeSwitcher() {
-    apiKeySwitcher = await loadApiKeys(); // استفاده از loadApiKeys سراسری
-}
 
-// تابع نمایش لودینگ
+
 function showLoading() {
-    document.body.insertAdjacentHTML('beforeend', `
-        <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="flex flex-col items-center">
-                <div class="popcorn mb-6">
-                    <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <!-- جعبه پاپ‌کورن -->
-                        <rect x="16" y="32" width="32" height="24" rx="4" fill="#ffaa07" stroke="#1f2937" stroke-width="2"/>
-                        <rect x="12" y="28" width="40" height="8" rx="2" fill="#ffaa07"/>
-                        <!-- خطوط کلاسیک روی جعبه -->
-                        <path d="M16 32 L48 32" stroke="#1f2937" stroke-width="2"/>
-                        <path d="M16 36 L48 36" stroke="#1f2937" stroke-width="1"/>
-                        <!-- پاپ‌کورن‌های بیرون‌زده -->
-                        <circle cx="24" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out;"/>
-                        <circle cx="32" cy="20" r="5" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.2s;"/>
-                        <circle cx="40" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.4s;"/>
-                        <!-- نوشته "Popcorn" روی جعبه -->
-                    </svg>
-                </div>
-                <p class="text-white text-lg font-semibold">در حال دریافت نتایج...</p>
-            </div>
-        </div>
-    `);
+    if (document.getElementById('loading-overlay')) return;
+    const loadingHtml = `
+         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50" aria-live="assertive">
+              <div class="flex flex-col items-center">
+                 <div class="popcorn mb-6">
+                     <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="32" width="32" height="24" rx="4" fill="#ffaa07" stroke="#1f2937" stroke-width="2"/><rect x="12" y="28" width="40" height="8" rx="2" fill="#ffaa07"/><path d="M16 32 L48 32" stroke="#1f2937" stroke-width="2"/><path d="M16 36 L48 36" stroke="#1f2937" stroke-width="1"/><circle cx="24" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out;"/><circle cx="32" cy="20" r="5" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.2s;"/><circle cx="40" cy="24" r="6" fill="#ffaa07" class="popcorn-piece" style="animation: pop 1.5s infinite ease-in-out 0.4s;"/></svg>
+                 </div>
+                 <p class="text-white text-lg font-semibold">در حال دریافت نتایج...</p>
+             </div>
+         </div>
+     `;
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
 }
 
-// تابع حذف لودینگ
 function hideLoading() {
     const loadingOverlay = document.getElementById('loading-overlay');
     if (loadingOverlay) loadingOverlay.remove();
 }
 
+/**
+ * Creates the HTML string for a single result card.
+ * Expects item object to have `posterUrl` pre-fetched.
+ * @param {object} item - The movie or TV item object including `posterUrl`.
+ * @param {'movie' | 'tv'} itemType - The type of the item.
+ * @returns {string} - The HTML string for the result card.
+ */
+function createResultCard(item, itemType) {
+    const id = item.id;
+    const title = itemType === 'movie' ? (item.title || 'نامشخص') : (item.name || 'نامشخص');
+    const date = itemType === 'movie' ? item.release_date : item.first_air_date;
+    const year = date ? date.substring(0, 4) : 'نامشخص';
+    // Use the pre-fetched posterUrl
+    const posterUrl = item.posterUrl || defaultPoster;
+    const detailPageUrl = itemType === 'movie' ? `../movie/index.html?id=${id}` : `../series/index.html?id=${id}`;
+    const encodedTitle = title.replace(/"/g, '&quot;');
 
-async function searchMovies(query) {
-    const movieResults = document.getElementById('movie-results');
-    const tvResults = document.getElementById('tv-results');
-    const movieTitle = document.getElementById('movie-title');
-    const tvTitle = document.getElementById('tv-title');
+    // Improved card layout (similar to previous)
+    return `
+         <div class="group relative overflow-hidden rounded-lg shadow-lg bg-gray-800">
+             <img src="${posterUrl}" alt="پوستر ${encodedTitle}" class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" onerror="this.onerror=null; this.src='${defaultPoster}';">
+             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
+             <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end items-center text-center p-3">
+                 <h3 class="text-base sm:text-lg font-bold text-white mb-1">${title}</h3>
+                 <p class="text-sm text-gray-300 mb-2">${year}</p>
+                 <a href="${detailPageUrl}" class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors z-50">
+                     مشاهده جزئیات
+                 </a>
+             </div>
+              <div class="absolute bottom-0 left-0 right-0 p-2 bg-black bg-opacity-60 group-hover:opacity-0 transition-opacity duration-300">
+                  <h3 class="text-sm font-bold text-white truncate" title="${encodedTitle}">${title}</h3>
+                  <p class="text-xs text-gray-300">${year}</p>
+              </div>
+         </div>
+     `;
+}
 
-    // تبدیل به حروف کوچک و حذف فاصله‌های اضافی
+/**
+ * Displays results or "not found" message.
+ * (Same logic as before, expects items with posterUrl)
+ */
+function displayResults(container, sectionElement, titleElement, items, itemType, query, notFoundMessage) {
+    titleElement.textContent = `نتایج جستجو ${itemType === 'movie' ? 'فیلم' : 'سریال'} برای "${query}"`;
+
+    if (items && items.length > 0) {
+        const resultsHtml = items.map(item => createResultCard(item, itemType)).join('');
+        container.innerHTML = resultsHtml;
+        sectionElement.classList.remove('hidden');
+    } else {
+        container.innerHTML = `<p class="text-center text-gray-400 col-span-full">${notFoundMessage}</p>`;
+        sectionElement.classList.remove('hidden'); // Show section even if empty to display message
+    }
+}
+
+// --- Main Search Function ---
+
+/**
+ * Fetches media data including posters concurrently.
+ * @param {Array} items - Array of movie or TV items from TMDb search.
+ * @param {'movie' | 'tv'} itemType - Type of items.
+ * @returns {Promise<Array>} - Promise resolving to an array of items with posterUrl added.
+ */
+async function fetchPostersForItems(items, itemType) {
+    const posterPromises = items.map(async (item) => {
+        const itemId = item.id;
+        const itemTitle = itemType === 'movie' ? item.title : item.name;
+        const externalIdsUrl = `https://api.themoviedb.org/3/${itemType}/${itemId}/external_ids?api_key=${tmdbApiKey}`;
+        let imdbId = null;
+        let posterUrl = defaultPoster; // Default assume
+
+        try {
+            const response = await fetch(externalIdsUrl);
+            if (response.ok) {
+                const idsData = await response.json();
+                imdbId = idsData.imdb_id;
+            } else {
+                console.warn(`Failed to fetch external IDs for ${itemType} ${itemId}: ${response.status}`);
+            }
+
+            // Regardless of external ID fetch success, try getting poster (if imdbId found)
+            if (imdbId) {
+                posterUrl = await getCachedOrFetchPoster(imdbId, itemTitle);
+            } else {
+                // If no imdb_id, maybe use TMDb poster as fallback?
+                if (item.poster_path) {
+                    posterUrl = `${baseImageUrl}${item.poster_path}`;
+                    console.log(`Using TMDb poster as fallback for ${itemTitle}`);
+                } else {
+                    posterUrl = defaultPoster; // Stick to default if no TMDb poster either
+                }
+            }
+
+        } catch (error) {
+            console.error(`Error processing poster for ${itemType} ${itemTitle} (ID: ${itemId}):`, error);
+            posterUrl = defaultPoster; // Ensure default on error
+        }
+
+        return { ...item, posterUrl }; // Return original item data + posterUrl
+    });
+
+    // Wait for all poster fetches (or cache lookups) to complete
+    // Use allSettled if you want to continue even if some fetches fail
+    try {
+        const itemsWithPosters = await Promise.all(posterPromises);
+        return itemsWithPosters;
+    } catch(error) {
+        console.error("Error during batch poster fetching:", error);
+        // Fallback: return original items without posters or with defaults
+        return items.map(item => ({ ...item, posterUrl: defaultPoster }));
+    }
+}
+
+/**
+ * Main function to search media based on query and type.
+ */
+async function searchMedia(query, searchType) {
     const cleanedQuery = query.trim().toLowerCase();
+    if (cleanedQuery.length < minQueryLength) {
+        alert(`لطفاً حداقل ${minQueryLength} کاراکتر وارد کنید.`);
+        return;
+    }
 
-    // نمایش لودینگ
     showLoading();
+    movieResultsContainer.innerHTML = '';
+    tvResultsContainer.innerHTML = '';
+    movieSection.classList.add('hidden');
+    tvSection.classList.add('hidden');
+
+    const encodedQuery = encodeURIComponent(cleanedQuery);
+    const baseSearchUrl = 'https://api.themoviedb.org/3/search';
+    const commonParams = `api_key=${tmdbApiKey}&language=${language}&query=${encodedQuery}`;
+    const movieSearchUrl = `${baseSearchUrl}/movie?${commonParams}`;
+    const tvSearchUrl = `${baseSearchUrl}/tv?${commonParams}`;
+
+    let promisesToFetch = [];
+    if (searchType === 'movie' || searchType === 'all') {
+        promisesToFetch.push(fetch(movieSearchUrl).then(res => res.ok ? res.json() : Promise.reject(`خطای API فیلم: ${res.status}`)));
+    }
+    if (searchType === 'tv' || searchType === 'all') {
+        promisesToFetch.push(fetch(tvSearchUrl).then(res => res.ok ? res.json() : Promise.reject(`خطای API سریال: ${res.status}`)));
+    }
 
     try {
-        // Define TMDb search endpoints
-        const movieSearchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(cleanedQuery)}`;
-        const tvSearchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=${language}&query=${encodeURIComponent(cleanedQuery)}`;
+        const initialResults = await Promise.all(promisesToFetch);
 
-        // دریافت همه داده‌ها قبل از نمایش
-        const [movieRes, tvRes] = await Promise.all([
-            fetch(movieSearchUrl).then(res => {
-                if (!res.ok) throw new Error(`خطای سرور (فیلم‌ها): ${res.status}`);
-                return res.json();
-            }),
-            fetch(tvSearchUrl).then(res => {
-                if (!res.ok) throw new Error(`خطای سرور (سریال‌ها): ${res.status}`);
-                return res.json();
-            })
-        ]);
-
-        const movies = movieRes.results || [];
-        const tvSeries = tvRes.results || [];
-
-        console.log('Movie results:', movieRes); // Debugging
-        console.log('TV results:', tvRes); // Debugging
-
-        // پاکسازی کانتینرها فقط بعد از لود کامل
-        movieResults.innerHTML = '';
-        tvResults.innerHTML = '';
-        movieTitle.textContent = `نتایج جستجو فیلم ${cleanedQuery}`;
-        tvTitle.textContent = `نتایج جستجو سریال ${cleanedQuery}`;
-
-        // مجموعه‌ای برای جلوگیری از تکرار
-        const seenIds = new Set();
-
-        // رندر فقط بعد از دریافت همه داده‌ها
-        if (tvSeries.length > 0 || movies.length > 0) {
-            // رندر سریال‌ها (اولویت با سریال‌ها)
-            if (tvSeries.length > 0) {
-                for (const tv of tvSeries) {
-                    if (seenIds.has(tv.id)) {
-                        console.warn(`سریال تکراری با شناسه ${tv.id} حذف شد`);
-                        continue;
-                    }
-                    seenIds.add(tv.id);
-
-                    let poster = defaultPoster;
-                    const tvExternalIdsUrl = `https://api.themoviedb.org/3/tv/${tv.id}/external_ids?api_key=${apiKey}`;
-                    try {
-                        const externalIdsRes = await fetch(tvExternalIdsUrl);
-                        if (!externalIdsRes.ok) throw new Error(`خطای سرور (شناسه‌های خارجی سریال): ${externalIdsRes.status}`);
-                        const externalIdsData = await externalIdsRes.json();
-                        const imdbId = externalIdsData.imdb_id || '';
-                        if (imdbId) {
-                            poster = await getCachedImage(imdbId, async () => {
-                                const omdbData = await apiKeySwitcher.fetchWithKeySwitch(
-                                    (key) => `https://www.omdbapi.com/?i=${imdbId}&apikey=${key}`
-                                );
-                                return omdbData.Poster && omdbData.Poster !== 'N/A' ? omdbData.Poster : defaultPoster;
-                            });
-                        }
-                    } catch (fetchError) {
-                        console.warn(`خطا در دریافت پوستر سریال ${tv.id} از OMDB:`, fetchError.message);
-                    }
-
-                    let posterUrl = poster; //.replace(/300(?=\.jpg$)/i, '');
-
-                    const tvId = tv.id;
-                    const title = tv.name || 'نامشخص';
-                    const year = tv.first_air_date ? tv.first_air_date.substr(0, 4) : 'نامشخص';
-
-                    tvResults.innerHTML += `
-                        <div class="group relative">
-                            <img src="${posterUrl}" alt="${title}" class="w-full h-auto rounded-lg shadow-lg">
-                            <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-center p-4">
-                                <h3 class="text-lg font-bold">${title}</h3>
-                                <p class="text-sm">${year}</p>
-                                <a href="../series/index.html?id=${tvId}" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">مشاهده</a>
-                            </div>
-                        </div>
-                    `;
-                }
-            } else {
-                tvResults.innerHTML = '<p class="text-center text-red-500">سریالی یافت نشد!</p>';
-            }
-
-            // رندر فیلم‌ها
-            if (movies.length > 0) {
-                for (const movie of movies) {
-                    if (seenIds.has(movie.id)) {
-                        console.warn(`فیلم تکراری با شناسه ${movie.id} حذف شد`);
-                        continue;
-                    }
-                    seenIds.add(movie.id);
-
-                    let poster = defaultPoster;
-                    const movieExternalIdsUrl = `https://api.themoviedb.org/3/movie/${movie.id}/external_ids?api_key=${apiKey}`;
-                    try {
-                        const externalIdsRes = await fetch(movieExternalIdsUrl);
-                        if (!externalIdsRes.ok) throw new Error(`خطای سرور (شناسه‌های خارجی فیلم): ${externalIdsRes.status}`);
-                        const externalIdsData = await externalIdsRes.json();
-                        const imdbId = externalIdsData.imdb_id || '';
-                        if (imdbId) {
-                            poster = await getCachedImage(imdbId, async () => {
-                                const omdbData = await apiKeySwitcher.fetchWithKeySwitch(
-                                    (key) => `https://www.omdbapi.com/?i=${imdbId}&apikey=${key}`
-                                );
-                                return omdbData.Poster && omdbData.Poster !== 'N/A' ? omdbData.Poster : defaultPoster;
-                            });
-                        }
-                    } catch (fetchError) {
-                        console.warn(`خطا در دریافت پوستر فیلم ${movie.id} از OMDB:`, fetchError.message);
-                    }
-
-                    let posterUrl = poster.replace(/300(?=\.jpg$)/i, '');
-
-                    const movieId = movie.id;
-                    const title = movie.title || 'نامشخص';
-                    const year = movie.release_date ? movie.release_date.substr(0, 4) : 'نامشخص';
-
-                    movieResults.innerHTML += `
-                        <div class="group relative">
-                            <img src="${posterUrl}" alt="${title}" class="w-full h-auto rounded-lg shadow-lg">
-                            <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-center p-4">
-                                <h3 class="text-lg font-bold">${title}</h3>
-                                <p class="text-sm">${year}</p>
-                                <a href="../movie/index.html?id=${movieId}" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">مشاهده</a>
-                            </div>
-                        </div>
-                    `;
-                }
-            } else {
-                movieResults.innerHTML = '<p class="text-center text-red-500">فیلمی یافت نشد!</p>';
-            }
-        } else {
-            movieResults.innerHTML = '<p class="text-center text-red-500">نتیجه‌ای یافت نشد!</p>';
-            tvResults.innerHTML = '';
+        let moviesRaw = [];
+        let tvSeriesRaw = [];
+        let resultIndex = 0;
+        if (searchType === 'movie' || searchType === 'all') {
+            moviesRaw = initialResults[resultIndex]?.results || [];
+            resultIndex++;
         }
+        if (searchType === 'tv' || searchType === 'all') {
+            tvSeriesRaw = initialResults[resultIndex]?.results || [];
+        }
+
+        // --- Fetch Posters Concurrently ---
+        let movieItems = [];
+        let tvItems = [];
+        let posterFetchPromises = [];
+
+        if (moviesRaw.length > 0) {
+            posterFetchPromises.push(fetchPostersForItems(moviesRaw, 'movie').then(results => movieItems = results));
+        }
+        if (tvSeriesRaw.length > 0) {
+            posterFetchPromises.push(fetchPostersForItems(tvSeriesRaw, 'tv').then(results => tvItems = results));
+        }
+
+        // Wait for all poster fetching batches to complete
+        await Promise.all(posterFetchPromises);
+        // --- End Poster Fetching ---
+
+
+        // Now render using the data with posters
+        if (searchType === 'movie' || searchType === 'all') {
+            displayResults(movieResultsContainer, movieSection, movieTitleElement, movieItems, 'movie', cleanedQuery, 'فیلمی با این مشخصات یافت نشد.');
+        }
+        if (searchType === 'tv' || searchType === 'all') {
+            displayResults(tvResultsContainer, tvSection, tvTitleElement, tvItems, 'tv', cleanedQuery, 'سریالی با این مشخصات یافت نشد.');
+        }
+
+        if (searchType === 'all' && movieItems.length === 0 && tvItems.length === 0) {
+            console.log("هیچ نتیجه‌ای (نه فیلم، نه سریال) یافت نشد.");
+        }
+
     } catch (error) {
-        console.error('خطا در دریافت اطلاعات:', error);
-        movieResults.innerHTML = '<p class="text-center text-red-500">خطایی رخ داد! لطفاً دوباره تلاش کنید.</p>';
-        tvResults.innerHTML = '';
+        console.error('خطا در دریافت اطلاعات جستجو:', error);
+        movieSection.classList.remove('hidden');
+        movieResultsContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">خطایی در هنگام جستجو رخ داد. لطفاً دوباره تلاش کنید.</p>`;
+        tvSection.classList.add('hidden');
+        movieTitleElement.textContent = 'خطا در جستجو';
+        tvTitleElement.textContent = 'نتایج جستجو سریال'; // Reset
     } finally {
-        // حذف لودینگ بعد از اتمام کار (موفق یا ناموفق)
         hideLoading();
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await initializeSwitcher();
-    const searchInput = document.getElementById('search');
-    const searchButton = document.getElementById('search-button');
 
-    searchButton.addEventListener('click', () => {
-        const query = searchInput.value.trim();
-        if (query.length > 2) {
-            searchMovies(query);
-        } else {
-            hideLoading();
-            document.getElementById('movie-title').textContent = 'نتایج جستجو فیلم';
-            document.getElementById('tv-title').textContent = 'نتایج جستجو سریال';
-            document.getElementById('movie-results').innerHTML = `
-                <div class="skeleton"></div>
-                <div class="skeleton"></div>
-            `;
-            document.getElementById('tv-results').innerHTML = '';
-        }
-    });
+// --- Event Listeners & Initial Setup ---
+function handleSearch() {
+    const query = searchInput.value;
+    const selectedType = searchTypeSelect.value;
+    searchMedia(query, selectedType);
+}
 
-    // اجازه جستجو با Enter
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchButton.click();
-        }
-    });
+searchButton.addEventListener('click', handleSearch);
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSearch();
+    }
 });
 
-// حذف debounce چون با دکمه کار نمی‌کنه
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("صفحه جستجو آماده است. در حال مقداردهی اولیه سوییچر کلید...");
+    // Initialize the OMDB API key switcher before allowing searches
+    await initializeSwitcher();
 
-document.getElementById('menu-toggle')?.addEventListener('click', () => {
-    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+    movieSection.classList.add('hidden');
+    tvSection.classList.add('hidden');
+    movieTitleElement.textContent = 'نتایج جستجو فیلم';
+    tvTitleElement.textContent = 'نتایج جستجو سریال';
+
+    // Mobile menu toggle
+    document.getElementById('menu-toggle')?.addEventListener('click', () => {
+        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+    });
 });
