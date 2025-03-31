@@ -1,116 +1,45 @@
+/* style.css */
 body {
     font-family: "Vazir", sans-serif;
     direction: rtl;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #111827;
-}
-
-#videoLink {
-    transition: all 0.3s ease;
-    border: 2px solid #4b5563;
-}
-
-#videoLink:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-}
-
-#shareLink {
-    direction: ltr;
-    text-align: left;
-    font-family: monospace;
-    transition: all 0.3s ease;
-    border: 2px solid #4b5563;
-}
-
-#shareLink:focus {
-    outline: none;
+    background: #111827;
 }
 
 #videoPlayer {
-    max-width: 100%;
-    height: auto;
+    aspect-ratio: 16/9;
+    max-height: 70vh;
     background: #000;
     border-radius: 0.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-#connectionStatus {
-    font-size: 0.9rem;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background-color: rgba(17, 24, 39, 0.8);
-    margin-top: 1rem;
-    transition: all 0.3s ease;
+    object-fit: contain;
 }
 
 #inputSection, #shareSection, #videoSection {
+    transition: all 0.3s ease;
+}
+
+.hidden {
     opacity: 0;
+    pointer-events: none;
     transform: translateY(20px);
-    transition: all 0.5s ease;
 }
 
-#inputSection.show, #shareSection.show, #videoSection.show {
+.show {
     opacity: 1;
+    pointer-events: all;
     transform: translateY(0);
-}
-
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
 }
 
 @media (max-width: 768px) {
     #videoPlayer {
-        width: 100%;
-        height: auto;
+        max-height: 50vh;
     }
     
-    .container {
-        padding: 0 1rem;
+    header h1 {
+        font-size: 1.1rem;
     }
-}
-
-/* انیمیشن‌های زیبا */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* اضافه کردن این بخش به فایل style.css */
-#inputSection.show,
-#shareSection.show,
-#videoSection.show {
-    opacity: 1;
-    transform: translateY(0);
-    display: block !important;
-}
-
-#inputSection.hidden,
-#shareSection.hidden,
-#videoSection.hidden {
-    display: none !important;
-}
-
-/* اضافه کردن انیمیشن برای انتقال نرم */
-#videoPlayer {
-    transition: all 0.3s ease;
-}
-
-/* بهبود ظاهر دکمه‌ها */
-button, a {
-    transition: all 0.2s ease;
-}
-
-button:hover, a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
+    #videoLink {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
 }

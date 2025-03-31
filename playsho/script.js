@@ -1,315 +1,231 @@
-// متغیرهای اصلی
-let video, connectionStatus;
+// script.js
 let peerConnection, dataChannel;
 let isHost = false;
-let sessionId = null;
-let videoUrl = null;
-let isSyncing = false;
-
-// مقداردهی اولیه هنگام بارگذاری صفحه
-window.onload = function () {
-    video = document.getElementById('videoPlayer');
-    connectionStatus = document.getElementById('connectionStatus');
-    video.controls = false;
-
-    showInputSection();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const joinParam = urlParams.get('join');
-    const offerParam = urlParams.get('offer');
-    const answerParam = urlParams.get('answer');
-    videoUrl = urlParams.get('video');
-
-    if (videoUrl) {
-        showVideoSection();
-        loadVideo(() => {
-            if (offerParam) {
-                setupHostConnection(joinParam, offerParam);
-            } else if (joinParam && !offerParam && !answerParam) {
-                setupGuestConnection(joinParam);
-            } else if (answerParam) {
-                handleAnswer(answerParam);
-            }
-        });
-    }
+let currentSession = {
+    id: null,
+    videoUrl: null,
+    lastSync: 0,
+    retryCount: 0
 };
 
-// نمایش و مخفی کردن بخش‌ها
-function showSection(sectionId) {
-    ['inputSection', 'shareSection', 'videoSection'].forEach(id => {
-        const section = document.getElementById(id);
-        if (id === sectionId) {
-            section.classList.remove('hidden');
-            section.classList.add('show');
-        } else {
-            section.classList.add('hidden');
-            section.classList.remove('show');
-        }
-    });
+const ICE_CONFIG = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+    ]
+};
+
+// توابع اصلی
+function decodeURLParams() {
+    const urlParams = new URLSearchParams(location.search);
+    currentSession.id = urlParams.get('join');
+    currentSession.videoUrl = decodeURIComponent(urlParams.get('video') || '');
 }
 
-function showInputSection() { showSection('inputSection'); }
-function showVideoSection() { showSection('videoSection'); }
-function showShareSection() { showSection('shareSection'); }
-
-// بارگذاری ویدیو
-function loadVideo(callback) {
-    const linkInput = document.getElementById('videoLink');
-    videoUrl = videoUrl || linkInput.value.trim();
-
-    if (!videoUrl) {
-        showStatus('لطفاً لینک ویدیو را وارد کنید', 'red');
-        linkInput.focus();
-        return;
-    }
-
-    if (!isValidUrl(videoUrl)) {
-        showStatus('لینک ویدیو نامعتبر است', 'red');
-        return;
-    }
-
-    showStatus('در حال بارگذاری ویدیو...', 'blue');
-    video.src = videoUrl;
-    video.load();
-
-    video.onloadeddata = () => {
-        video.controls = true;
-        setupVideoEventListeners();
-        showStatus('ویدیو آماده پخش است', 'green');
-        if (!sessionId) createNewSession();
-        showVideoSection();
-        if (callback) callback();
-    };
-
-    video.onerror = () => {
-        showStatus('خطا در بارگذاری ویدیو. لطفاً لینک را بررسی کنید.', 'red');
-        showInputSection();
-    };
-}
-
-// اعتبارسنجی URL
-function isValidUrl(url) {
+function isValidVideoUrl(url) {
     try {
         new URL(url);
-        return url.match(/\.(mp4|webm|ogg)$/i);
-    } catch (_) {
+        return /^(https?|ftp):\/\/.+/i.test(url) && 
+               /\.(mp4|webm|ogg|m3u8|mkv|avi|mov)(\?.*)?$/i.test(url);
+    } catch {
         return false;
     }
 }
 
-// ایجاد جلسه جدید
-function createNewSession() {
-    sessionId = generateSessionId();
-    localStorage.setItem(`session_${sessionId}_videoUrl`, videoUrl);
-    setupShareSection();
-    showShareSection();
-}
+async function initializeVideoPlayer() {
+    const video = document.getElementById('videoPlayer');
+    
+    if (!isValidVideoUrl(currentSession.videoUrl)) {
+        showStatus('لینک ویدیو نامعتبر است', 'red');
+        return showSection('inputSection');
+    }
 
-// تنظیم بخش اشتراک‌گذاری
-function setupShareSection() {
-    const shareLink = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}`;
-    document.getElementById('shareLink').value = shareLink;
-
-    const shareText = 'با من این ویدیو رو همزمان تماشا کن: ';
-    document.getElementById('whatsappShare').href = `https://wa.me/?text=${encodeURIComponent(shareText + shareLink)}`;
-    document.getElementById('telegramShare').href = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
-}
-
-// کپی لینک
-function copyShareLink() {
-    const shareLink = document.getElementById('shareLink');
-    shareLink.select();
-    document.execCommand('copy');
-    showStatus('لینک کپی شد!', 'green');
-}
-
-// تنظیم رویدادهای ویدیو
-function setupVideoEventListeners() {
-    const events = ['play', 'pause', 'seeked', 'ended'];
-    events.forEach(event => {
-        video.addEventListener(event, () => {
-            if (!isSyncing && dataChannel?.readyState === 'open') {
-                const syncData = {
-                    type: event,
-                    time: video.currentTime,
-                    isPlaying: !video.paused && event !== 'ended'
-                };
-                sendSyncData(syncData);
-            }
-        });
-    });
-
-    // بررسی دوره‌ای برای سینک بهتر
-    setInterval(() => {
-        if (isHost && dataChannel?.readyState === 'open' && !isSyncing) {
-            sendSyncData({
-                type: 'sync',
-                time: video.currentTime,
-                isPlaying: !video.paused
-            });
-        }
-    }, 1000); // هر 1 ثانیه برای سینک بهتر
-}
-
-// تنظیم اتصال میزبان
-function setupHostConnection(joinId, offerData) {
-    isHost = true;
-    sessionId = joinId;
-    setupPeerConnection();
-    const desc = JSON.parse(decodeURIComponent(offerData));
-    peerConnection.setLocalDescription(desc);
-}
-
-// تنظیم اتصال مهمان
-function setupGuestConnection(joinId) {
-    isHost = false;
-    sessionId = joinId;
-    setupPeerConnection();
-    startGuestConnection();
-}
-
-// شروع اتصال مهمان
-function startGuestConnection() {
-    peerConnection.createOffer()
-        .then(offer => peerConnection.setLocalDescription(offer))
-        .then(() => {
-            const offerUrl = `${window.location.origin}${window.location.pathname}?join=${sessionId}&video=${encodeURIComponent(videoUrl)}&offer=${encodeURIComponent(JSON.stringify(peerConnection.localDescription))}`;
-            window.location.href = offerUrl;
-        })
-        .catch(err => {
-            console.error('خطا در ایجاد پیشنهاد:', err);
-            showStatus('خطا در اتصال. دوباره تلاش کنید.', 'red');
-        });
-}
-
-// مدیریت پاسخ مهمان
-function handleAnswer(answerData) {
     try {
-        const answer = JSON.parse(decodeURIComponent(answerData));
-        peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
-            .then(() => showStatus('اتصال برقرار شد!', 'green'))
-            .catch(err => {
-                console.error('خطا در تنظیم توضیحات ریموت:', err);
-                showStatus('خطا در اتصال', 'red');
-            });
+        video.src = currentSession.videoUrl;
+        await video.play();
+        video.controls = true;
+        setupVideoSync(video);
+        showSection('videoSection');
+        
+        if (!currentSession.id) {
+            createNewSession();
+        } else {
+            setupPeerConnection();
+        }
     } catch (err) {
-        console.error('خطا در پردازش پاسخ:', err);
-        showStatus('خطا در پردازش پاسخ', 'red');
+        console.error('خطا:', err);
+        showStatus('خطا در بارگذاری ویدیو - مطمئن شوید لینک مستقیم و CORS فعال است', 'red');
+        showSection('inputSection');
     }
 }
 
-// تنظیم اتصال Peer
-function setupPeerConnection() {
-    peerConnection = new RTCPeerConnection({
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
+function setupVideoSync(videoElement) {
+    const syncEvents = ['play', 'pause', 'seeked', 'timeupdate'];
+    
+    syncEvents.forEach(event => {
+        videoElement.addEventListener(event, () => {
+            if (!isHost || !dataChannel || dataChannel.readyState !== 'open') return;
+            
+            const syncData = {
+                type: event,
+                time: videoElement.currentTime,
+                timestamp: Date.now(),
+                isPlaying: !videoElement.paused
+            };
+            
+            sendSyncData(syncData);
+        });
     });
+}
+
+function setupPeerConnection() {
+    peerConnection = new RTCPeerConnection(ICE_CONFIG);
 
     if (isHost) {
-        dataChannel = peerConnection.createDataChannel('syncChannel');
+        dataChannel = peerConnection.createDataChannel('sync');
         setupDataChannel();
     } else {
-        peerConnection.ondatachannel = event => {
-            dataChannel = event.channel;
+        peerConnection.ondatachannel = e => {
+            dataChannel = e.channel;
             setupDataChannel();
         };
     }
 
-    peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-            console.log('ICE Candidate:', event.candidate);
-        }
+    peerConnection.onicecandidate = e => {
+        if (e.candidate) console.log('ICE Candidate:', e.candidate);
     };
 
     peerConnection.onconnectionstatechange = () => {
         const state = peerConnection.connectionState;
-        showStatus(`وضعیت اتصال: ${state}`, state === 'connected' ? 'green' : 'blue');
-        if (state === 'disconnected' || state === 'failed') {
-            showStatus('اتصال قطع شد. در حال تلاش مجدد...', 'red');
-            setTimeout(() => window.location.reload(), 3000);
+        showStatus(`وضعیت اتصال: ${state}`, state === 'connected' ? 'green' : 'yellow');
+        
+        if (state === 'disconnected' && currentSession.retryCount < 3) {
+            currentSession.retryCount++;
+            setTimeout(() => window.location.reload(), 2000);
         }
     };
 }
 
-// تنظیم کانال داده
 function setupDataChannel() {
     dataChannel.onopen = () => {
-        showStatus('اتصال برقرار شد! ویدیوها هماهنگ هستند.', 'green');
-        if (isHost) {
-            sendSyncData({
-                type: 'sync',
-                time: video.currentTime,
-                isPlaying: !video.paused
-            });
-        }
+        showStatus('اتصال برقرار شد!', 'green');
+        if (isHost) sendSyncData('fullSync');
     };
 
-    dataChannel.onmessage = event => {
+    dataChannel.onmessage = async e => {
         try {
-            const data = JSON.parse(event.data);
-            isSyncing = true;
-
-            const timeDiff = Math.abs(video.currentTime - data.time);
-            if (timeDiff > 0.2) video.currentTime = data.time; // فقط اگر اختلاف بیش از 0.2 ثانیه باشد
-
-            switch (data.type) {
-                case 'play':
-                    video.play().catch(e => console.log('خطا در پخش:', e));
-                    break;
-                case 'pause':
-                    video.pause();
-                    break;
-                case 'seeked':
-                    if (data.isPlaying) video.play().catch(e => console.log('خطا در پخش:', e));
-                    else video.pause();
-                    break;
-                case 'ended':
-                    video.pause();
-                    video.currentTime = 0;
-                    break;
-                case 'sync':
-                    if (data.isPlaying && video.paused) video.play().catch(e => console.log('خطا در پخش:', e));
-                    else if (!data.isPlaying && !video.paused) video.pause();
-                    break;
-            }
-            setTimeout(() => { isSyncing = false; }, 100);
+            const data = JSON.parse(e.data);
+            await handleSyncData(data);
         } catch (err) {
             console.error('خطا در پردازش پیام:', err);
         }
     };
-
-    dataChannel.onclose = () => showStatus('اتصال قطع شد', 'red');
-    dataChannel.onerror = err => {
-        console.error('خطا در کانال داده:', err);
-        showStatus('خطا در ارتباط', 'red');
-    };
 }
 
-// ارسال داده همگام‌سازی
-function sendSyncData(data) {
-    if (dataChannel && dataChannel.readyState === 'open') {
-        try {
-            dataChannel.send(JSON.stringify(data));
-        } catch (err) {
-            console.error('خطا در ارسال داده:', err);
-        }
+async function handleSyncData(data) {
+    const video = document.getElementById('videoPlayer');
+    const now = Date.now();
+    
+    if (now - currentSession.lastSync < 100) return;
+    currentSession.lastSync = now;
+
+    const latency = (now - data.timestamp) / 1000;
+    const adjustedTime = data.time + latency;
+
+    if (Math.abs(video.currentTime - adjustedTime) > 0.5) {
+        video.currentTime = adjustedTime;
+    }
+
+    switch (data.type) {
+        case 'play':
+            await video.play();
+            break;
+        case 'pause':
+            video.pause();
+            break;
+        case 'seek':
+            video.currentTime = adjustedTime;
+            break;
+        case 'fullSync':
+            video.currentTime = adjustedTime;
+            data.isPlaying ? await video.play() : video.pause();
+            break;
     }
 }
 
-// نمایش وضعیت
+// توابع کمکی
+function showSection(sectionId) {
+    document.querySelectorAll('[id$="Section"]').forEach(el => {
+        el.classList.toggle('hidden', el.id !== sectionId);
+        el.classList.toggle('fade-in', el.id === sectionId);
+    });
+}
+
 function showStatus(message, color) {
-    connectionStatus.textContent = message;
-    connectionStatus.style.color = color;
+    const statusEl = document.getElementById('connectionStatus');
+    statusEl.textContent = message;
+    statusEl.style.color = color;
 }
 
-// تولید شناسه جلسه
 function generateSessionId() {
-    return Math.random().toString(36).substring(2, 15);
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-// رویدادهای جهانی
-window.loadVideo = loadVideo;
-window.copyShareLink = copyShareLink;
+function createNewSession() {
+    currentSession.id = generateSessionId();
+    setupShareSection();
+    showSection('shareSection');
+    setupPeerConnection();
+    isHost = true;
+}
+
+function setupShareSection() {
+    const encodedUrl = encodeURIComponent(currentSession.videoUrl);
+    const shareLink = `${location.origin}${location.pathname}?join=${currentSession.id}&video=${encodedUrl}`;
+    
+    document.getElementById('shareLink').value = shareLink;
+    const shareText = `با من تماشا کن: ${currentSession.videoUrl}`;
+    
+    document.getElementById('whatsappShare').href = 
+        `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    document.getElementById('telegramShare').href = 
+        `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
+}
+
+// Event Handlers
+window.onload = () => {
+    decodeURLParams();
+    if (currentSession.videoUrl) {
+        initializeVideoPlayer();
+    } else {
+        showSection('inputSection');
+    }
+};
+
+window.loadVideo = () => {
+    const videoUrl = document.getElementById('videoLink').value.trim();
+    if (!videoUrl) return showStatus('لینک ویدیو را وارد کنید', 'red');
+    
+    currentSession.videoUrl = videoUrl;
+    const encodedUrl = encodeURIComponent(videoUrl);
+    location.href = `${location.pathname}?video=${encodedUrl}`;
+};
+
+window.copyShareLink = () => {
+    navigator.clipboard.writeText(document.getElementById('shareLink').value)
+        .then(() => showStatus('لینک کپی شد!', 'green'))
+        .catch(() => showStatus('خطا در کپی لینک', 'red'));
+};
+
+window.showInputSection = () => {
+    history.replaceState(null, '', location.pathname);
+    location.reload();
+};
+
+// تابع ارسال داده همگام‌سازی
+function sendSyncData(data) {
+    if (dataChannel.readyState === 'open') {
+        dataChannel.send(JSON.stringify(data));
+    }
+}
